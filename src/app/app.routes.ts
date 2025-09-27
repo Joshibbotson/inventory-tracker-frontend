@@ -1,3 +1,47 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
-export const routes: Routes = [];
+const protectedRoutes = [
+  {
+    path: '',
+    component: MainLayoutComponent,
+    // canActivate: [authGuard],
+    children: [
+      {
+        path: '**',
+        redirectTo: 'dashboard',
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then(
+            (m) => m.DASHBOARD_ROUTES
+          ),
+      },
+      {
+        path: 'materials',
+        loadChildren: () =>
+          import('./features/materials/materials.routes').then(
+            (m) => m.MATERIALS_ROUTES
+          ),
+      },
+      {
+        path: 'products',
+        loadChildren: () =>
+          import('./features/products/products.routes').then(
+            (m) => m.PRODUCTS_ROUTES
+          ),
+      },
+      {
+        path: 'sales',
+        loadChildren: () =>
+          import('./features/sales/sales.routes').then((m) => m.SALES_ROUTES),
+      },
+    ],
+  },
+];
+
+const publicRoutes: Routes = [];
+
+export const routes: Routes = [...publicRoutes, ...protectedRoutes];

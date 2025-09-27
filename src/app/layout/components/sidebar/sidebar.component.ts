@@ -1,0 +1,190 @@
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, RouterLinkActive } from '@angular/router';
+
+interface MenuItem {
+  label: string;
+  icon: string;
+  route: string;
+  badge?: number;
+}
+
+@Component({
+  selector: 'app-sidebar',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <aside
+      [class.translate-x-0]="isOpen"
+      [class.-translate-x-full]="!isOpen"
+      class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-neutral-200 transition-transform duration-300 ease-in-out lg:translate-x-0"
+    >
+      <!-- Logo -->
+      <div class="flex items-center h-16 px-6 border-b border-neutral-200">
+        <div class="flex items-center gap-3">
+          <!-- Candle icon -->
+          <div
+            class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-amber-600"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+              />
+            </svg>
+          </div>
+          <span class="text-lg font-semibold text-neutral-900"
+            >Kirrou Stock</span
+          >
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="px-3 py-4">
+        <!-- Main Menu -->
+        <div class="space-y-1">
+          @for (item of menuItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-amber-50 text-amber-700 border-amber-200"
+            [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+            class="flex items-center gap-3 px-3 py-2 text-neutral-600 rounded-lg hover:bg-neutral-50 transition-colors group"
+          >
+            <div [innerHTML]="item.icon" class="w-5 h-5"></div>
+            <span class="font-medium">{{ item.label }}</span>
+            @if (item.badge) {
+            <span
+              class="ml-auto bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full"
+            >
+              {{ item.badge }}
+            </span>
+            }
+          </a>
+          }
+        </div>
+
+        <!-- Secondary Menu -->
+        <div class="mt-8">
+          <h3
+            class="px-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider"
+          >
+            Quick Actions
+          </h3>
+          <div class="mt-3 space-y-1">
+            <button
+              class="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              <span class="font-medium">Add Material</span>
+            </button>
+            <button
+              class="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+              <span class="font-medium">Quick Sale</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stock Alert Section -->
+        <div class="mt-8 px-3">
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div class="flex items-start gap-2">
+              <svg
+                class="w-5 h-5 text-amber-600 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-amber-900">
+                  Low Stock Alert
+                </p>
+                <p class="text-xs text-amber-700 mt-1">
+                  5 materials need restocking
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+  `,
+  styles: [],
+})
+export class SidebarComponent {
+  @Input() isOpen = true;
+
+  menuItems: MenuItem[] = [
+    {
+      label: 'Dashboard',
+      route: '/dashboard',
+      icon: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>`,
+    },
+    {
+      label: 'Materials',
+      route: '/materials',
+      icon: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>`,
+      badge: 5,
+    },
+    {
+      label: 'Products',
+      route: '/products',
+      icon: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+      </svg>`,
+    },
+    {
+      label: 'Sales',
+      route: '/sales',
+      icon: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+      </svg>`,
+    },
+    {
+      label: 'Reports',
+      route: '/reports',
+      icon: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>`,
+    },
+  ];
+}
