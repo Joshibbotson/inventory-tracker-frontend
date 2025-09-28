@@ -10,4 +10,5 @@ export type User = {
   isFirstLogin: boolean;
   currentWorkoutSplitId?: string;
   authProvider: AuthProvider;
+  businessName?: string;
 };

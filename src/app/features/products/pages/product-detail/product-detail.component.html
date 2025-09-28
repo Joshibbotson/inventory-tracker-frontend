@@ -1,0 +1,349 @@
+<div class="max-w-6xl mx-auto">
+  @if (loading()) {
+  <div class="flex justify-center items-center h-64">
+    <svg
+      class="animate-spin h-8 w-8 text-amber-600"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  </div>
+  } @else if (product()) {
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white shadow-sm rounded-lg">
+      <div class="px-6 py-4 border-b border-neutral-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button
+              (click)="navigateBack()"
+              class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-5 w-5 text-neutral-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </button>
+            <div>
+              <h1 class="text-2xl font-bold text-neutral-900">
+                {{ product()!.name }}
+              </h1>
+              <p class="text-sm text-neutral-500">SKU: {{ product()!.sku }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              [routerLink]="['/products', product()!._id, 'edit']"
+              class="inline-flex items-center px-4 py-2 border border-neutral-300 rounded-lg shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+            >
+              <svg
+                class="mr-2 h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              Edit
+            </a>
+            <button
+              (click)="deleteProduct()"
+              class="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <svg
+                class="mr-2 h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Product Image and Info -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Image -->
+            <div
+              class="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg bg-neutral-100"
+            >
+              @if (product()!.imageUrl) {
+              <img
+                [src]="product()!.imageUrl"
+                [alt]="product()!.name"
+                class="h-full w-full object-cover object-center"
+              />
+              } @else {
+              <div
+                class="h-64 flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50"
+              >
+                <svg
+                  class="h-24 w-24 text-amber-300"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                  />
+                </svg>
+              </div>
+              }
+            </div>
+
+            <!-- Description -->
+            <div>
+              <h3 class="text-lg font-medium text-neutral-900 mb-2">
+                Description
+              </h3>
+              <p class="text-neutral-600">
+                {{ product()!.description || "No description available." }}
+              </p>
+            </div>
+
+            <!-- Recipe/BOM -->
+            <div>
+              <h3 class="text-lg font-medium text-neutral-900 mb-4">
+                Recipe / Bill of Materials
+              </h3>
+              @if (product()!.recipe && product()!.recipe.length > 0) {
+              <div class="bg-neutral-50 rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-neutral-200">
+                  <thead class="bg-neutral-100">
+                    <tr>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                      >
+                        Material
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                      >
+                        Quantity
+                      </th>
+                      <th
+                        class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                      >
+                        Unit
+                      </th>
+                      <th
+                        class="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                      >
+                        Cost
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-neutral-200">
+                    @for (item of product()!.recipe; track $index) {
+                    <tr>
+                      <td
+                        class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900"
+                      >
+                        {{ item.material.name || item.material }}
+                      </td>
+                      <td
+                        class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900"
+                      >
+                        {{ item.quantity }}
+                      </td>
+                      <td
+                        class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500"
+                      >
+                        {{ item.unit.name || item.unit }}
+                      </td>
+                      <td
+                        class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 text-right"
+                      >
+                        £{{
+                          item.quantity * (item.material.costPerUnit || 0)
+                            | number : "1.2-2"
+                        }}
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                  <tfoot class="bg-neutral-100">
+                    <tr>
+                      <td
+                        colspan="3"
+                        class="px-6 py-3 text-sm font-medium text-neutral-900"
+                      >
+                        Total Material Cost
+                      </td>
+                      <td
+                        class="px-6 py-3 text-sm font-bold text-neutral-900 text-right"
+                      >
+                        £{{ calculateTotalCost() | number : "1.2-2" }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              } @else {
+              <p class="text-neutral-500 italic">
+                No recipe defined for this product.
+              </p>
+              }
+            </div>
+          </div>
+
+          <!-- Sidebar Info -->
+          <div class="space-y-6">
+            <!-- Quick Sale -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+              <h3 class="text-lg font-medium text-amber-900 mb-4">
+                Quick Sale
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <label
+                    for="saleQuantity"
+                    class="block text-sm font-medium text-amber-800"
+                    >Quantity</label
+                  >
+                  <input
+                    type="number"
+                    id="saleQuantity"
+                    [(ngModel)]="saleQuantity"
+                    min="1"
+                    class="mt-1 block w-full rounded-lg border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+                  />
+                </div>
+                <button
+                  (click)="recordSale()"
+                  [disabled]="saleLoading()"
+                  class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
+                >
+                  @if (saleLoading()) {
+                  <svg
+                    class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Processing... } @else { Record Sale }
+                </button>
+              </div>
+              @if (saleSuccess()) {
+              <div
+                class="mt-3 p-2 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm"
+              >
+                Sale recorded successfully!
+              </div>
+              }
+            </div>
+
+            <!-- Product Details -->
+            <div class="bg-white border border-neutral-200 rounded-lg p-6">
+              <h3 class="text-lg font-medium text-neutral-900 mb-4">
+                Product Details
+              </h3>
+              <dl class="space-y-3">
+                <div>
+                  <dt class="text-sm font-medium text-neutral-500">Category</dt>
+                  <dd class="mt-1 text-sm text-neutral-900 capitalize">
+                    {{ product()!.category.replace("_", " ") }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-neutral-500">Status</dt>
+                  <dd class="mt-1">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800':
+                          product()!.status === 'active',
+                        'bg-yellow-100 text-yellow-800':
+                          product()!.status === 'seasonal',
+                        'bg-red-100 text-red-800':
+                          product()!.status === 'discontinued'
+                      }"
+                    >
+                      {{ product()!.status }}
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-neutral-500">
+                    Selling Price
+                  </dt>
+                  <dd class="mt-1 text-2xl font-bold text-neutral-900">
+                    £{{ product()!.sellingPrice | number : "1.2-2" }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-neutral-500">
+                    Material Cost
+                  </dt>
+                  <dd class="mt-1 text-sm text-neutral-900">
+                    £{{ calculateTotalCost() | number : "1.2-2" }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-neutral-500">
+                    Profit Margin
+                  </dt>
+                  <dd class="mt-1 text-sm font-medium text-green-600">
+                    {{ calculateMargin() | number : "1.0-0" }}%
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

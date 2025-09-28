@@ -1,0 +1,299 @@
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <button
+      (click)="navigateBack()"
+      class="inline-flex items-center text-sm text-neutral-600 hover:text-neutral-900"
+    >
+      <svg
+        class="mr-2 h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        />
+      </svg>
+      Back to Materials
+    </button>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-lg">
+    <div class="px-6 py-4 border-b border-neutral-200">
+      <h1 class="text-xl font-semibold text-neutral-900">
+        {{ isEditMode ? "Edit Material" : "Add New Material" }}
+      </h1>
+    </div>
+
+    <form
+      [formGroup]="materialForm"
+      (ngSubmit)="onSubmit()"
+      class="p-6 space-y-6"
+    >
+      <!-- Basic Information -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-medium text-neutral-900">Basic Information</h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <!-- Name -->
+          <div>
+            <label for="name" class="block text-sm font-medium text-neutral-700"
+              >Material Name</label
+            >
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                materialForm.get('name')?.invalid &&
+                materialForm.get('name')?.touched
+              "
+            />
+            @if (materialForm.get('name')?.invalid &&
+            materialForm.get('name')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Material name is required</p>
+            }
+          </div>
+
+          <!-- SKU -->
+          <div>
+            <label for="sku" class="block text-sm font-medium text-neutral-700"
+              >SKU</label
+            >
+            <input
+              id="sku"
+              type="text"
+              formControlName="sku"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                materialForm.get('sku')?.invalid &&
+                materialForm.get('sku')?.touched
+              "
+            />
+            @if (materialForm.get('sku')?.invalid &&
+            materialForm.get('sku')?.touched) {
+            <p class="mt-1 text-xs text-red-600">SKU is required</p>
+            }
+          </div>
+
+          <!-- Category -->
+          <div>
+            <label
+              for="category"
+              class="block text-sm font-medium text-neutral-700"
+              >Category</label
+            >
+            <select
+              id="category"
+              formControlName="category"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            >
+              <option value="wax">Wax</option>
+              <option value="wick">Wick</option>
+              <option value="fragrance">Fragrance</option>
+              <option value="dye">Dye</option>
+              <option value="container">Container</option>
+              <option value="label">Label</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Unit -->
+          <div>
+            <label for="unit" class="block text-sm font-medium text-neutral-700"
+              >Unit of Measurement</label
+            >
+            <select
+              id="unit"
+              formControlName="unit"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                materialForm.get('unit')?.invalid &&
+                materialForm.get('unit')?.touched
+              "
+            >
+              <option value="">Select Unit</option>
+              @for (unit of units(); track unit._id) {
+              <option [value]="unit._id">
+                {{ unit.name }} ({{ unit.abbreviation }})
+              </option>
+              }
+            </select>
+            @if (materialForm.get('unit')?.invalid &&
+            materialForm.get('unit')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Unit is required</p>
+            }
+          </div>
+
+          <!-- Supplier -->
+          <div class="sm:col-span-2">
+            <label
+              for="supplier"
+              class="block text-sm font-medium text-neutral-700"
+              >Supplier</label
+            >
+            <input
+              id="supplier"
+              type="text"
+              formControlName="supplier"
+              placeholder="e.g. Candle Supply Co."
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock Information -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-medium text-neutral-900">Stock Information</h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <!-- Current Stock -->
+          <div>
+            <label
+              for="currentStock"
+              class="block text-sm font-medium text-neutral-700"
+              >Current Stock</label
+            >
+            <input
+              id="currentStock"
+              type="number"
+              formControlName="currentStock"
+              min="0"
+              step="0.01"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            />
+          </div>
+
+          <!-- Minimum Stock -->
+          <div>
+            <label
+              for="minimumStock"
+              class="block text-sm font-medium text-neutral-700"
+              >Minimum Stock</label
+            >
+            <input
+              id="minimumStock"
+              type="number"
+              formControlName="minimumStock"
+              min="0"
+              step="0.01"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            />
+          </div>
+
+          <!-- Cost Per Unit -->
+          <div>
+            <label
+              for="costPerUnit"
+              class="block text-sm font-medium text-neutral-700"
+              >Cost Per Unit (£)</label
+            >
+            <input
+              id="costPerUnit"
+              type="number"
+              formControlName="costPerUnit"
+              min="0"
+              step="0.01"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            />
+          </div>
+        </div>
+
+        <!-- Stock Value -->
+        @if (materialForm.get('currentStock')?.value &&
+        materialForm.get('costPerUnit')?.value) {
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-amber-900">
+                Current Inventory Value
+              </p>
+              <p class="text-xs text-amber-700 mt-1">
+                Based on current stock and cost
+              </p>
+            </div>
+            <div class="text-lg font-semibold text-amber-900">
+              £{{ calculateStockValue() | number : "1.2-2" }}
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label for="notes" class="block text-sm font-medium text-neutral-700"
+          >Notes</label
+        >
+        <textarea
+          id="notes"
+          formControlName="notes"
+          rows="3"
+          class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+          placeholder="Optional notes about this material"
+        ></textarea>
+      </div>
+
+      <!-- Active -->
+      <div class="flex items-center">
+        <input
+          id="isActive"
+          type="checkbox"
+          formControlName="isActive"
+          class="h-4 w-4 text-amber-600 border-neutral-300 rounded focus:ring-amber-500"
+        />
+        <label for="isActive" class="ml-2 block text-sm text-neutral-700">
+          Active
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="navigateBack()"
+          class="px-4 py-2 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
+        >
+          <svg
+            *ngIf="loading()"
+            class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 
+              0 5.373 0 12h4zm2 5.291A7.962 
+              7.962 0 014 12H0c0 3.042 1.135 
+              5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          {{ isEditMode ? "Update" : "Create" }} Material
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

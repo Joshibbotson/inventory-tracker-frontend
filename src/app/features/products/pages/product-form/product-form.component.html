@@ -1,0 +1,345 @@
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <button
+      (click)="navigateBack()"
+      class="inline-flex items-center text-sm text-neutral-600 hover:text-neutral-900"
+    >
+      <svg
+        class="mr-2 h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        />
+      </svg>
+      Back to Products
+    </button>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-lg">
+    <div class="px-6 py-4 border-b border-neutral-200">
+      <h1 class="text-xl font-semibold text-neutral-900">
+        {{ isEditMode ? "Edit Product" : "Create New Product" }}
+      </h1>
+    </div>
+
+    <form
+      [formGroup]="productForm"
+      (ngSubmit)="onSubmit()"
+      class="p-6 space-y-6"
+    >
+      <!-- Basic Information -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-medium text-neutral-900">Basic Information</h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <!-- Product Name -->
+          <div>
+            <label for="name" class="block text-sm font-medium text-neutral-700"
+              >Product Name</label
+            >
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                productForm.get('name')?.invalid &&
+                productForm.get('name')?.touched
+              "
+            />
+            @if (productForm.get('name')?.invalid &&
+            productForm.get('name')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Product name is required</p>
+            }
+          </div>
+
+          <!-- SKU -->
+          <div>
+            <label for="sku" class="block text-sm font-medium text-neutral-700"
+              >SKU</label
+            >
+            <input
+              type="text"
+              id="sku"
+              formControlName="sku"
+              placeholder="e.g. HAL-8OZ-001"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                productForm.get('sku')?.invalid &&
+                productForm.get('sku')?.touched
+              "
+            />
+            @if (productForm.get('sku')?.invalid &&
+            productForm.get('sku')?.touched) {
+            <p class="mt-1 text-xs text-red-600">SKU is required</p>
+            }
+          </div>
+
+          <!-- Category -->
+          <div>
+            <label
+              for="category"
+              class="block text-sm font-medium text-neutral-700"
+              >Category</label
+            >
+            <select
+              id="category"
+              formControlName="category"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+            >
+              <option value="regular">Regular</option>
+              <option value="seasonal">Seasonal</option>
+              <option value="limited_edition">Limited Edition</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label
+              for="status"
+              class="block text-sm font-medium text-neutral-700"
+              >Status</label
+            >
+            <select
+              id="status"
+              formControlName="status"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+            >
+              <option value="active">Active</option>
+              <option value="seasonal">Seasonal</option>
+              <option value="discontinued">Discontinued</option>
+            </select>
+          </div>
+
+          <!-- Selling Price -->
+          <div>
+            <label
+              for="sellingPrice"
+              class="block text-sm font-medium text-neutral-700"
+              >Selling Price (£)</label
+            >
+            <input
+              type="number"
+              id="sellingPrice"
+              formControlName="sellingPrice"
+              step="0.01"
+              min="0"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              [class.border-red-500]="
+                productForm.get('sellingPrice')?.invalid &&
+                productForm.get('sellingPrice')?.touched
+              "
+            />
+            @if (productForm.get('sellingPrice')?.invalid &&
+            productForm.get('sellingPrice')?.touched) {
+            <p class="mt-1 text-xs text-red-600">
+              Selling price is required and must be positive
+            </p>
+            }
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label
+            for="description"
+            class="block text-sm font-medium text-neutral-700"
+            >Description</label
+          >
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Recipe Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-neutral-900">
+            Recipe / Bill of Materials
+          </h2>
+          <button
+            type="button"
+            (click)="addRecipeItem()"
+            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-amber-700 bg-amber-100 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+          >
+            <svg
+              class="mr-1.5 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Material
+          </button>
+        </div>
+
+        <div formArrayName="recipe" class="space-y-3">
+          @for (item of recipeItems.controls; track $index; let i = $index) {
+          <div
+            [formGroupName]="i"
+            class="flex gap-3 p-4 bg-neutral-50 rounded-lg"
+          >
+            <!-- Material Select -->
+            <div class="flex-1">
+              <label class="sr-only">Material</label>
+              <select
+                formControlName="material"
+                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              >
+                <option value="">Select Material</option>
+                @for (material of materials(); track material._id) {
+                <option [value]="material._id">
+                  {{ material.name }} ({{ material.sku }})
+                </option>
+                }
+              </select>
+            </div>
+
+            <!-- Quantity -->
+            <div class="w-24">
+              <label class="sr-only">Quantity</label>
+              <input
+                type="number"
+                formControlName="quantity"
+                step="0.01"
+                min="0"
+                placeholder="Qty"
+                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              />
+            </div>
+
+            <!-- Unit Select -->
+            <div class="w-32">
+              <label class="sr-only">Unit</label>
+              <select
+                formControlName="unit"
+                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+              >
+                <option value="">Select Unit</option>
+                @for (unit of units(); track unit._id) {
+                <option [value]="unit._id">{{ unit.name }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Remove Button -->
+            <button
+              type="button"
+              (click)="removeRecipeItem(i)"
+              class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          </div>
+          }
+        </div>
+
+        @if (recipeItems.length === 0) {
+        <div
+          class="text-center py-8 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-300"
+        >
+          <p class="text-sm text-neutral-600">No materials added yet</p>
+          <p class="text-xs text-neutral-500 mt-1">
+            Click "Add Material" to start building your recipe
+          </p>
+        </div>
+        }
+
+        <!-- Cost Summary -->
+        @if (recipeItems.length > 0) {
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-amber-900">
+                Estimated Material Cost
+              </p>
+              <p class="text-xs text-amber-700 mt-1">
+                Based on current material prices
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-semibold text-amber-900">
+                £{{ calculateTotalCost() | number : "1.2-2" }}
+              </p>
+              <p class="text-xs text-amber-700 mt-1">
+                Margin: {{ calculateMargin() | number : "1.0-0" }}%
+              </p>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end gap-3 pt-6 border-t border-neutral-200">
+        <button
+          type="button"
+          (click)="navigateBack()"
+          class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading() || productForm.invalid"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (loading()) {
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Saving... } @else {
+          {{ isEditMode ? "Update Product" : "Create Product" }}
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
