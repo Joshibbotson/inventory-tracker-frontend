@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://gym-note-plus-production.up.railway.app',
+  apiUrl: 'inventory-tracker-backend-production.up.railway.app',
 };
