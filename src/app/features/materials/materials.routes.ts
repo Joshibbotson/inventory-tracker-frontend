@@ -1,12 +1,11 @@
 import { Routes } from '@angular/router';
-// import { MaterialListComponent } from './pages/material-list/material-list.component';
-// import { MaterialFormComponent } from './pages/material-form/material-form.component';
+import { MaterialListComponent } from './pages/material-list/material-list.component';
 
 export const MATERIALS_ROUTES: Routes = [
-  //   {
-  //     path: '',
-  //     component: MaterialListComponent,
-  //   },
+  {
+    path: '',
+    component: MaterialListComponent,
+  },
   //   {
   //     path: 'new',
   //     component: MaterialFormComponent,

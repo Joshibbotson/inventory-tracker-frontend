@@ -21,9 +21,9 @@ export class AuthService {
 
   public user = signal<User | null>(null);
 
-  async initUser(): Promise<void> {
+  initUser(): void {
     try {
-      const user = await this.getUserFromPreferences();
+      const user = this.getUserFromLocalStorage();
       if (user) {
         this.User = user;
       } else {
@@ -42,16 +42,16 @@ export class AuthService {
     this.user.set(user);
   }
 
-  async getUserFromPreferences(): Promise<User | null> {
-    const value = await localStorage.getItem(this.USER_STORAGE_KEY);
+  getUserFromLocalStorage(): User | null {
+    const value = localStorage.getItem(this.USER_STORAGE_KEY);
     if (value) {
       return JSON.parse(value) as User;
     }
     return null;
   }
 
-  async setUserInLocalStorage(user: User): Promise<void> {
-    await localStorage.setItem(this.USER_STORAGE_KEY, JSON.stringify(user));
+  setUserInLocalStorage(user: User): void {
+    localStorage.setItem(this.USER_STORAGE_KEY, JSON.stringify(user));
   }
 
   /**
@@ -112,14 +112,14 @@ export class AuthService {
     return this.http
       .post<LoginResponseDto>(`${this.apiUrl}/auth/local/login`, credentials)
       .pipe(
-        tap(async (res) => {
-          await this.setUserInLocalStorage(res.user);
+        tap((res) => {
+          this.setUserInLocalStorage(res.user);
           this.user.set(res.user);
 
-          await localStorage.setItem('token', res.token);
+          localStorage.setItem('token', res.token);
 
           // Handle tutorial navigation
-          await this.handlePostLoginNavigation(res.user);
+          this.handlePostLoginNavigation(res.user);
         }),
         catchError((error) => {
           console.error('[loginWithLocal] error:', error);
@@ -132,14 +132,14 @@ export class AuthService {
     return this.http
       .post<LoginResponseDto>(`${this.apiUrl}/auth/register`, userData)
       .pipe(
-        tap(async (res) => {
-          await this.setUserInLocalStorage(res.user);
+        tap((res) => {
+          this.setUserInLocalStorage(res.user);
           this.user.set(res.user);
 
           localStorage.setItem('token', res.token);
 
           // Handle tutorial navigation
-          await this.handlePostLoginNavigation(res.user);
+          this.handlePostLoginNavigation(res.user);
         }),
         catchError((error) => {
           console.error('[register] error:', error);
@@ -155,14 +155,14 @@ export class AuthService {
     return this.http
       .post<LoginResponseDto>(`${this.apiUrl}/auth/${authprovider}/login`, user)
       .pipe(
-        tap(async (res) => {
-          await this.setUserInLocalStorage(res.user);
+        tap((res) => {
+          this.setUserInLocalStorage(res.user);
           this.user.set(res.user);
 
           localStorage.setItem('token', res.token);
 
           // Handle tutorial navigation
-          await this.handlePostLoginNavigation(res.user);
+          this.handlePostLoginNavigation(res.user);
         }),
         catchError((error) => {
           console.error('[loginWithOAuth] error:', error);
@@ -173,8 +173,8 @@ export class AuthService {
 
   fetchUpdatedUserAndSetInPreferences(): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/user-details`).pipe(
-      tap(async (user) => {
-        await this.setUserInLocalStorage(user);
+      tap((user) => {
+        this.setUserInLocalStorage(user);
         this.user.set(user);
         console.log('fetchedUser:', user);
       }),

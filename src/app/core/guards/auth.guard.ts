@@ -9,13 +9,12 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
   // check for logged in user if route is login page
   // only allow access if no logged in user.
-
   if (routePathLogin) {
     if (authService.User) {
       router.navigate(['/dashboard']);
       return false;
     }
-    const user = await authService.getUserFromPreferences();
+    const user = authService.getUserFromLocalStorage();
 
     if (user !== null) {
       authService.User = user;
@@ -32,7 +31,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
     return true;
   }
 
-  const user = await authService.getUserFromPreferences();
+  const user = authService.getUserFromLocalStorage();
 
   if (user !== null) {
     authService.User = user;

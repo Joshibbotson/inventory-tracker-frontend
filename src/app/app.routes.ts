@@ -1,17 +1,15 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { AUTH_ROUTES } from './features/auth/auth.routes';
 
 const protectedRoutes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [authGuard],
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
-      {
-        path: '**',
-        redirectTo: 'dashboard',
-      },
       {
         path: 'dashboard',
         loadChildren: () =>
@@ -38,10 +36,14 @@ const protectedRoutes = [
         loadChildren: () =>
           import('./features/sales/sales.routes').then((m) => m.SALES_ROUTES),
       },
+      {
+        path: '**',
+        redirectTo: 'dashboard',
+      },
     ],
   },
 ];
 
-const publicRoutes: Routes = [];
+const publicRoutes: Routes = [...AUTH_ROUTES];
 
 export const routes: Routes = [...publicRoutes, ...protectedRoutes];
