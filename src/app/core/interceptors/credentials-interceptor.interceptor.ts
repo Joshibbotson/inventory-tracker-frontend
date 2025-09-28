@@ -8,7 +8,7 @@ export function credentialsInterceptor(
   const tokenItem = localStorage.getItem('token');
 
   if (tokenItem) {
-    const token = JSON.parse(tokenItem);
+    const token = tokenItem;
     const newReq = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${token}`),
     });
