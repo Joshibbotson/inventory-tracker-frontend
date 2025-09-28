@@ -169,6 +169,7 @@
   >
     @for (product of filteredProducts(); track product._id) {
     <div
+      [routerLink]="['/products', product._id]"
       class="bg-white rounded-lg shadow-sm border border-neutral-200 hover:shadow-md transition-shadow"
     >
       <!-- Product Image -->
@@ -236,7 +237,7 @@
               £{{ product.sellingPrice }}
             </p>
             <p class="text-xs text-neutral-500">
-              {{ product.recipe?.length || 0 }} ingredients
+              {{ product.recipe.length || 0 }} ingredients
             </p>
           </div>
           <div class="flex gap-1">

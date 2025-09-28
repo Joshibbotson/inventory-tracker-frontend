@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterLinkActive } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 interface MenuItem {
   label: string;
@@ -36,9 +37,9 @@ interface MenuItem {
               />
             </svg>
           </div>
-          <span class="text-lg font-semibold text-neutral-900"
-            >Kirrou Stock</span
-          >
+          <span class="text-lg font-semibold text-neutral-900">{{
+            businessName
+          }}</span>
         </div>
       </div>
 
@@ -148,6 +149,7 @@ interface MenuItem {
 })
 export class SidebarComponent {
   @Input() isOpen = true;
+  businessName = environment.businessName;
 
   menuItems: MenuItem[] = [
     {

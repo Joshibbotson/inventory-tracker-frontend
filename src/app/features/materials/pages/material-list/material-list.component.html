@@ -202,6 +202,31 @@
   </div>
   } @else {
   <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+    <!-- Summary Stats -->
+    @if (!loading() && filteredMaterials().length > 0) {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+        <dt class="text-sm font-medium text-neutral-500">Total Materials</dt>
+        <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+          {{ materials().length }}
+        </dd>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+        <dt class="text-sm font-medium text-neutral-500">
+          Total Inventory Value
+        </dt>
+        <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+          £{{ calculateTotalValue() | number : "1.2-2" }}
+        </dd>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+        <dt class="text-sm font-medium text-neutral-500">Low Stock Items</dt>
+        <dd class="mt-1 text-3xl font-semibold text-red-600">
+          {{ lowStockMaterials().length }}
+        </dd>
+      </div>
+    </div>
+    }
     <table class="min-w-full divide-y divide-neutral-200">
       <thead class="bg-neutral-50">
         <tr>
@@ -386,32 +411,6 @@
         }
       </tbody>
     </table>
-  </div>
-  }
-
-  <!-- Summary Stats -->
-  @if (!loading() && filteredMaterials().length > 0) {
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
-      <dt class="text-sm font-medium text-neutral-500">Total Materials</dt>
-      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        {{ materials().length }}
-      </dd>
-    </div>
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
-      <dt class="text-sm font-medium text-neutral-500">
-        Total Inventory Value
-      </dt>
-      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        £{{ calculateTotalValue() | number : "1.2-2" }}
-      </dd>
-    </div>
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
-      <dt class="text-sm font-medium text-neutral-500">Low Stock Items</dt>
-      <dd class="mt-1 text-3xl font-semibold text-red-600">
-        {{ lowStockMaterials().length }}
-      </dd>
-    </div>
   </div>
   }
 </div>

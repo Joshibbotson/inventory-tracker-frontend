@@ -158,7 +158,8 @@ export class NavbarComponent {
 
   getUserInitials(): string {
     // This would come from auth service
-    return 'KC';
+    const firstLetter = this.authService.User?.name.slice(0, 1).toUpperCase();
+    return firstLetter!;
   }
 
   toggleUserMenu() {
@@ -170,6 +171,6 @@ export class NavbarComponent {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.logout().subscribe();
   }
 }

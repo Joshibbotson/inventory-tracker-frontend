@@ -91,7 +91,8 @@ export class ProductDetailComponent implements OnInit {
         error: (error) => {
           console.error('Error recording sale:', error);
           this.saleLoading.set(false);
-          alert('Failed to record sale. Please try again.');
+
+          alert(`Failed to record sale: ${error['error']['message']}`);
         },
       });
   }

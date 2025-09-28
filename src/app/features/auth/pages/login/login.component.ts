@@ -235,7 +235,7 @@ import { AuthService } from '../../services/auth.service';
               </div>
               <div class="relative flex justify-center text-sm">
                 <span class="px-2 bg-white text-gray-500"
-                  >New to Kirrou Stock?</span
+                  >New to Iventory Stock?</span
                 >
               </div>
             </div>
@@ -243,7 +243,7 @@ import { AuthService } from '../../services/auth.service';
             <!-- Sign Up Link -->
             <div class="mt-6">
               <a
-                routerLink="/auth/register"
+                routerLink="/register"
                 class="w-full flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
               >
                 Create an account
