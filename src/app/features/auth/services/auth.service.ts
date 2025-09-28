@@ -8,7 +8,7 @@ import { LoginConfig } from '../types/LoginConfig';
 import { LoginResponseDto } from '../types/LoginResponseDto';
 import { RegisterConfig } from '../types/RegisterConfig';
 import { User } from '../types/User';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
