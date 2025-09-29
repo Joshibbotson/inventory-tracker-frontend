@@ -91,7 +91,7 @@ export class MaterialListComponent implements OnInit {
 
   calculateTotalValue(): number {
     return this.materials().reduce(
-      (total, m) => total + m.currentStock * m.costPerUnit,
+      (total, m) => total + m.currentStock * m.averageCost,
       0
     );
   }

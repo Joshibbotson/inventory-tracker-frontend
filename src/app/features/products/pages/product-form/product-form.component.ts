@@ -152,7 +152,7 @@ export class ProductFormComponent implements OnInit {
       const quantity = control.get('quantity')?.value || 0;
       const material = this.materials().find((m) => m._id === materialId);
       if (material) {
-        total += material.costPerUnit * quantity;
+        total += material.averageCost * quantity;
       }
     });
     return total;

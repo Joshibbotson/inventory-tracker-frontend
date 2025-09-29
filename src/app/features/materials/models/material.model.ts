@@ -7,7 +7,7 @@ export interface Material {
   unit: Unit;
   currentStock: number;
   minimumStock: number;
-  costPerUnit: number;
+  averageCost: number;
   supplier?: string;
   category: MaterialCategory;
   notes?: string;

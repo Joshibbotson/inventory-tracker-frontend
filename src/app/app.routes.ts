@@ -25,10 +25,24 @@ const protectedRoutes = [
           ),
       },
       {
+        path: 'material-orders',
+        loadChildren: () =>
+          import('./features/material-orders/material-orders.routes').then(
+            (m) => m.MATERIAL_ORDERS_ROUTES
+          ),
+      },
+      {
         path: 'products',
         loadChildren: () =>
           import('./features/products/products.routes').then(
             (m) => m.PRODUCTS_ROUTES
+          ),
+      },
+      {
+        path: 'production',
+        loadChildren: () =>
+          import('./features/production/production.routes').then(
+            (m) => m.PRODUCTION_ROUTES
           ),
       },
       {

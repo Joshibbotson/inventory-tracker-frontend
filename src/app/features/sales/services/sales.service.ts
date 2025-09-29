@@ -55,16 +55,26 @@ export class SalesService {
   // Get sales summary for dashboard
   getSalesSummary(): Observable<{
     todaySales: number;
+    todayRevenue: number;
     weekSales: number;
+    weekRevenue: number;
     monthSales: number;
-    topProducts: Array<{ product: string; quantity: number; revenue: number }>;
+    monthRevenue: number;
+    topProducts: Array<{
+      product: any;
+      quantity: number;
+      revenue: number;
+    }>;
   }> {
     return this.http.get<{
       todaySales: number;
+      todayRevenue: number;
       weekSales: number;
+      weekRevenue: number;
       monthSales: number;
+      monthRevenue: number;
       topProducts: Array<{
-        product: string;
+        product: any;
         quantity: number;
         revenue: number;
       }>;

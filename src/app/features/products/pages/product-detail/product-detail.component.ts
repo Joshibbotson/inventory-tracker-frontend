@@ -5,6 +5,7 @@ import { ProductsService } from '../../services/products.service';
 import { SalesService } from '../../../sales/services/sales.service';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../models/product.model';
+import { ProductionService } from '../../../production/services/production.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -17,13 +18,14 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private productsService = inject(ProductsService);
+  private readonly productionService = inject(ProductionService);
   private salesService = inject(SalesService);
 
   product = signal<Product | null>(null);
   loading = signal(true);
   saleLoading = signal(false);
   saleSuccess = signal(false);
-  saleQuantity = 1;
+  quantity = 1;
 
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id');
@@ -53,7 +55,7 @@ export class ProductDetailComponent implements OnInit {
     if (!product?.recipe) return 0;
 
     return product.recipe.reduce((total, item) => {
-      const cost = item.material.costPerUnit || 0;
+      const cost = item.material.averageCost || 0;
       return total + cost * item.quantity;
     }, 0);
   }
@@ -68,6 +70,32 @@ export class ProductDetailComponent implements OnInit {
     return ((price - cost) / price) * 100;
   }
 
+  // REDO material production
+
+  recordProduction(): void {
+    const product = this.product();
+    if (!product) return;
+
+    this.saleLoading.set(true);
+    this.saleSuccess.set(false);
+
+    this.productionService
+      .createProductionBatch(product._id, this.quantity)
+      .subscribe({
+        next: () => {
+          this.saleLoading.set(false);
+          this.saleSuccess.set(true);
+          this.quantity = 1;
+          setTimeout(() => this.saleSuccess.set(false), 3000);
+        },
+        error: (error) => {
+          console.error('Error recording sale:', error);
+          this.saleLoading.set(false);
+
+          alert(`Failed to record sale: ${error['error']['message']}`);
+        },
+      });
+  }
   recordSale() {
     const product = this.product();
     if (!product) return;
@@ -78,14 +106,14 @@ export class ProductDetailComponent implements OnInit {
     this.salesService
       .createSale({
         product: product._id,
-        quantity: this.saleQuantity,
-        totalPrice: product.sellingPrice * this.saleQuantity,
+        quantity: this.quantity,
+        totalPrice: product.sellingPrice * this.quantity,
       })
       .subscribe({
         next: () => {
           this.saleLoading.set(false);
           this.saleSuccess.set(true);
-          this.saleQuantity = 1;
+          this.quantity = 1;
           setTimeout(() => this.saleSuccess.set(false), 3000);
         },
         error: (error) => {

@@ -1,1 +1,577 @@
-<p>dashboard works!</p>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-neutral-900">Dashboard</h1>
+      <p class="mt-1 text-sm text-neutral-600">
+        Welcome back! Here's what's happening with your business today.
+      </p>
+    </div>
+    <div class="mt-4 sm:mt-0 flex gap-2">
+      <button
+        (click)="refreshData()"
+        [disabled]="loading()"
+        class="inline-flex items-center px-4 py-2 border border-neutral-300 rounded-lg shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50"
+      >
+        <svg
+          class="mr-2 -ml-1 h-5 w-5"
+          [class.animate-spin]="loading()"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Refresh
+      </button>
+      <select
+        [(ngModel)]="selectedPeriod"
+        (ngModelChange)="onPeriodChange()"
+        class="px-3 py-2 border border-neutral-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+      >
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Alerts Section -->
+  @if (lowStockMaterials().length > 0 || outOfStockMaterials().length > 0) {
+  <div class="space-y-4">
+    @if (outOfStockMaterials().length > 0) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg
+            class="h-5 w-5 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <h3 class="text-sm font-medium text-red-800">Out of Stock Alert</h3>
+          <div class="mt-2 text-sm text-red-700">
+            <p>
+              {{ outOfStockMaterials().length }} materials are completely out of
+              stock:
+            </p>
+            <ul class="list-disc list-inside mt-1">
+              @for (material of outOfStockMaterials().slice(0, 3); track
+              material._id) {
+              <li>{{ material.name }} ({{ material.sku }})</li>
+              } @if (outOfStockMaterials().length > 3) {
+              <li>... and {{ outOfStockMaterials().length - 3 }} more</li>
+              }
+            </ul>
+          </div>
+          <div class="mt-4">
+            <a
+              routerLink="/materials"
+              class="text-sm font-medium text-red-800 hover:text-red-700"
+            >
+              View all materials →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    } @if (lowStockMaterials().length > 0) {
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg
+            class="h-5 w-5 text-yellow-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">Low Stock Warning</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>
+              {{ lowStockMaterials().length }} materials are running low and
+              should be reordered soon.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Today's Sales -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-6 w-6 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-neutral-500 truncate">
+                Today's Revenue
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-neutral-900">
+                  £{{ stats().todayRevenue | number : "1.2-2" }}
+                </div>
+                <div
+                  class="ml-2 flex items-baseline text-sm font-semibold text-green-600"
+                >
+                  <svg
+                    class="self-center flex-shrink-0 h-5 w-5 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="sr-only">Increased by</span>
+                  {{ stats().todaySales }}
+                </div>
+                <span class="ml-1 text-sm text-neutral-500">sales</span>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week's Sales -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-6 w-6 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-neutral-500 truncate">
+                This Week
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-neutral-900">
+                  £{{ stats().weekRevenue | number : "1.2-2" }}
+                </div>
+                <div class="ml-2 text-sm text-neutral-600">
+                  ({{ stats().weekSales }} sales)
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Month's Sales -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-6 w-6 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-neutral-500 truncate">
+                This Month
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-neutral-900">
+                  £{{ stats().monthRevenue | number : "1.2-2" }}
+                </div>
+                <div class="ml-2 text-sm text-neutral-600">
+                  ({{ stats().monthSales }} sales)
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Value -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-6 w-6 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-neutral-500 truncate">
+                Inventory Value
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-neutral-900">
+                  £{{ stats().totalInventoryValue | number : "1.2-2" }}
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+    <!-- Sales Trend Chart -->
+    <div class="bg-white shadow-sm rounded-lg p-6">
+      <h3 class="text-lg font-medium text-neutral-900 mb-4">Sales Trend</h3>
+      @if (salesChartData().length > 0) {
+      <div class="h-64 flex items-end justify-between gap-2">
+        @for (data of salesChartData(); track data.date) {
+        <div class="flex-1 flex flex-col items-center">
+          <div
+            class="w-full bg-amber-100 rounded-t hover:bg-amber-200 transition-colors relative group"
+            [style.height.%]="(data.revenue / maxRevenue()) * 100"
+          >
+            <div
+              class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-neutral-900 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+            >
+              £{{ data.revenue | number : "1.2-2" }}
+            </div>
+          </div>
+          <span class="text-xs text-neutral-500 mt-2">{{
+            formatChartDate(data.date)
+          }}</span>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="h-64 flex items-center justify-center text-neutral-500">
+        <div class="text-center">
+          <svg
+            class="mx-auto h-12 w-12 text-neutral-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
+          </svg>
+          <p class="mt-2">No sales data available</p>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Top Products -->
+    <div class="bg-white shadow-sm rounded-lg p-6">
+      <h3 class="text-lg font-medium text-neutral-900 mb-4">Top Products</h3>
+      @if (topProducts().length > 0) {
+      <div class="space-y-3">
+        @for (item of topProducts(); track item.product._id; let i = $index) {
+        <div class="flex items-center">
+          <div class="flex-shrink-0 w-8 text-sm font-medium text-neutral-500">
+            #{{ i + 1 }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-neutral-900 truncate">
+              {{ item.product.name }}
+            </p>
+            <p class="text-xs text-neutral-500">{{ item.quantity }} sold</p>
+          </div>
+          <div class="text-sm font-medium text-neutral-900">
+            £{{ item.revenue | number : "1.2-2" }}
+          </div>
+        </div>
+        @if (i < topProducts().length - 1) {
+        <div class="border-b border-neutral-100"></div>
+        } }
+      </div>
+      } @else {
+      <div class="h-64 flex items-center justify-center text-neutral-500">
+        <div class="text-center">
+          <svg
+            class="mx-auto h-12 w-12 text-neutral-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+          <p class="mt-2">No products sold yet</p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Quick Actions and Inventory Status -->
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+    <!-- Quick Actions -->
+    <div class="bg-white shadow-sm rounded-lg p-6">
+      <h3 class="text-lg font-medium text-neutral-900 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <a
+          routerLink="/sales/pos"
+          class="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        >
+          <svg
+            class="h-5 w-5 text-amber-600 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+            />
+          </svg>
+          <span class="text-sm font-medium text-neutral-900">New Sale</span>
+        </a>
+        <a
+          routerLink="/products/new"
+          class="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        >
+          <svg
+            class="h-5 w-5 text-amber-600 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          <span class="text-sm font-medium text-neutral-900">Add Product</span>
+        </a>
+        <a
+          routerLink="/materials/new"
+          class="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        >
+          <svg
+            class="h-5 w-5 text-amber-600 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <span class="text-sm font-medium text-neutral-900">Add Material</span>
+        </a>
+        <a
+          routerLink="/reports"
+          class="flex items-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        >
+          <svg
+            class="h-5 w-5 text-amber-600 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v7m3-2h6"
+            />
+          </svg>
+          <span class="text-sm font-medium text-neutral-900">View Reports</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Inventory Status -->
+    <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2">
+      <h3 class="text-lg font-medium text-neutral-900 mb-4">
+        Inventory Status
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-neutral-50 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-600">
+                Total Materials
+              </p>
+              <p class="text-2xl font-semibold text-neutral-900 mt-1">
+                {{ stats().totalMaterials }}
+              </p>
+            </div>
+            <svg
+              class="h-8 w-8 text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-neutral-50 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-600">Total Products</p>
+              <p class="text-2xl font-semibold text-neutral-900 mt-1">
+                {{ stats().totalProducts }}
+              </p>
+            </div>
+            <svg
+              class="h-8 w-8 text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-yellow-800">Low Stock</p>
+              <p class="text-2xl font-semibold text-yellow-900 mt-1">
+                {{ stats().lowStockCount }}
+              </p>
+            </div>
+            <svg
+              class="h-8 w-8 text-yellow-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-red-800">Out of Stock</p>
+              <p class="text-2xl font-semibold text-red-900 mt-1">
+                {{ stats().outOfStockCount }}
+              </p>
+            </div>
+            <svg
+              class="h-8 w-8 text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

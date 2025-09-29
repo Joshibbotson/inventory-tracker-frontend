@@ -81,7 +81,7 @@ export class MaterialFormComponent implements OnInit {
               : material.unit,
           currentStock: material.currentStock,
           minimumStock: material.minimumStock,
-          costPerUnit: material.costPerUnit,
+          costPerUnit: material.averageCost,
           supplier: material.supplier,
           category: material.category,
           notes: material.notes,

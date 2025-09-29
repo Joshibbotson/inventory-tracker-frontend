@@ -18,19 +18,19 @@
           d="M10 19l-7-7m0 0l7-7m-7 7h18"
         />
       </svg>
-      Back to Materials
+      Back to Orders
     </button>
   </div>
 
   <div class="bg-white shadow-sm rounded-lg">
     <div class="px-6 py-4 border-b border-neutral-200">
       <h1 class="text-xl font-semibold text-neutral-900">
-        {{ isEditMode ? "Edit Material" : "Add New Material" }}
+        {{ isEditMode ? "Edit Material Order" : "Add New Material Order" }}
       </h1>
     </div>
 
     <form
-      [formGroup]="materialForm"
+      [formGroup]="materialOrderForm"
       (ngSubmit)="onSubmit()"
       class="p-6 space-y-6"
     >
@@ -41,92 +41,30 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <!-- Name -->
           <div>
-            <label for="name" class="block text-sm font-medium text-neutral-700"
-              >Material Name</label
-            >
-            <input
-              id="name"
-              type="text"
-              formControlName="name"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-              [class.border-red-500]="
-                materialForm.get('name')?.invalid &&
-                materialForm.get('name')?.touched
-              "
-            />
-            @if (materialForm.get('name')?.invalid &&
-            materialForm.get('name')?.touched) {
-            <p class="mt-1 text-xs text-red-600">Material name is required</p>
-            }
-          </div>
-
-          <!-- SKU -->
-          <div>
-            <label for="sku" class="block text-sm font-medium text-neutral-700"
-              >SKU</label
-            >
-            <input
-              id="sku"
-              type="text"
-              formControlName="sku"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-              [class.border-red-500]="
-                materialForm.get('sku')?.invalid &&
-                materialForm.get('sku')?.touched
-              "
-            />
-            @if (materialForm.get('sku')?.invalid &&
-            materialForm.get('sku')?.touched) {
-            <p class="mt-1 text-xs text-red-600">SKU is required</p>
-            }
-          </div>
-
-          <!-- Category -->
-          <div>
             <label
-              for="category"
+              for="material"
               class="block text-sm font-medium text-neutral-700"
-              >Category</label
+              >Material</label
             >
             <select
-              id="category"
-              formControlName="category"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-            >
-              <option value="wax">Wax</option>
-              <option value="wick">Wick</option>
-              <option value="fragrance">Fragrance</option>
-              <option value="dye">Dye</option>
-              <option value="container">Container</option>
-              <option value="label">Label</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <!-- Unit -->
-          <div>
-            <label for="unit" class="block text-sm font-medium text-neutral-700"
-              >Unit of Measurement</label
-            >
-            <select
-              id="unit"
-              formControlName="unit"
+              id="material"
+              formControlName="material"
               class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
               [class.border-red-500]="
-                materialForm.get('unit')?.invalid &&
-                materialForm.get('unit')?.touched
+                materialOrderForm.get('material')?.invalid &&
+                materialOrderForm.get('material')?.touched
               "
             >
-              <option value="">Select Unit</option>
-              @for (unit of units(); track unit._id) {
-              <option [value]="unit._id">
-                {{ unit.name }} ({{ unit.abbreviation }})
+              <option value="">Select Material</option>
+              @for (material of materials(); track material._id) {
+              <option [value]="material._id">
+                {{ material.name }}
               </option>
               }
             </select>
-            @if (materialForm.get('unit')?.invalid &&
-            materialForm.get('unit')?.touched) {
-            <p class="mt-1 text-xs text-red-600">Unit is required</p>
+            @if (materialOrderForm.get('material')?.invalid &&
+            materialOrderForm.get('material')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Material is required</p>
             }
           </div>
 
@@ -156,51 +94,32 @@
           <!-- Current Stock -->
           <div>
             <label
-              for="currentStock"
+              for="quantity"
               class="block text-sm font-medium text-neutral-700"
-              >Current Stock</label
+              >Quantity</label
             >
             <input
-              readonly
-              id="currentStock"
+              id="quantity"
               type="number"
-              formControlName="currentStock"
+              formControlName="quantity"
               min="0"
               step="1"
               class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
             />
           </div>
 
-          <!-- Minimum Stock -->
-          <div>
-            <label
-              for="minimumStock"
-              class="block text-sm font-medium text-neutral-700"
-              >Minimum Stock</label
-            >
-            <input
-              id="minimumStock"
-              type="number"
-              formControlName="minimumStock"
-              min="0"
-              step="1"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-            />
-          </div>
-
           <!-- Cost Per Unit -->
           <div>
             <label
-              for="averageCostPerUnit"
+              for="totalCost"
               class="block text-sm font-medium text-neutral-700"
             >
-              Average Cost Per Unit (£)
+              Total Cost (£)
             </label>
             <input
-              readonly
-              id="averageCostPerUnit"
+              id="totalCost"
               type="number"
-              formControlName="averageCostPerUnit"
+              formControlName="totalCost"
               min="0"
               step="0.01"
               class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
@@ -208,25 +127,23 @@
           </div>
         </div>
 
-        <!-- Stock Value -->
-        @if (materialForm.get('currentStock')?.value &&
-        materialForm.get('costPerUnit')?.value) {
+        <!-- Cost per Unit-->
+
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-amber-900">
-                Current Inventory Value
-              </p>
-              <p class="text-xs text-amber-700 mt-1">
-                Based on current stock and cost per unit
+                Cost per Unit (£)
               </p>
             </div>
             <div class="text-lg font-semibold text-amber-900">
-              £{{ calculateStockValue() | number : "1.2-2" }}
+              @if(!calculateCostPerUnit()) { £ -} @else { £{{
+                calculateCostPerUnit() | number : "1.2-2"
+              }}
+              }
             </div>
           </div>
         </div>
-        }
       </div>
 
       <!-- Notes -->
@@ -244,7 +161,7 @@
       </div>
 
       <!-- Active -->
-      <div class="flex items-center">
+      <!-- <div class="flex items-center">
         <input
           id="isActive"
           type="checkbox"
@@ -254,7 +171,7 @@
         <label for="isActive" class="ml-2 block text-sm text-neutral-700">
           Active
         </label>
-      </div>
+      </div> -->
 
       <!-- Submit -->
       <div class="flex justify-end gap-3">

@@ -316,11 +316,11 @@
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-            £{{ material.costPerUnit | number : "1.2-2" }}
+            £{{ material.averageCost | number : "1.2-2" }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
             £{{
-              material.currentStock * material.costPerUnit | number : "1.2-2"
+              material.currentStock * material.averageCost | number : "1.2-2"
             }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
@@ -348,51 +348,6 @@
             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
           >
             <div class="flex items-center gap-2 justify-end">
-              <!-- Quick Stock Adjustment -->
-              <div
-                class="flex items-center border border-neutral-200 rounded-lg"
-              >
-                <button
-                  (click)="adjustStock(material, -1)"
-                  class="p-1 hover:bg-neutral-100 rounded-l-lg"
-                  title="Decrease stock"
-                >
-                  <svg
-                    class="h-4 w-4 text-neutral-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M20 12H4"
-                    />
-                  </svg>
-                </button>
-                <span class="px-2 text-xs">{{ material.currentStock }}</span>
-                <button
-                  (click)="adjustStock(material, 1)"
-                  class="p-1 hover:bg-neutral-100 rounded-r-lg"
-                  title="Increase stock"
-                >
-                  <svg
-                    class="h-4 w-4 text-neutral-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </button>
-              </div>
-
               <a
                 [routerLink]="['/materials', material._id, 'edit']"
                 class="text-amber-600 hover:text-amber-900"

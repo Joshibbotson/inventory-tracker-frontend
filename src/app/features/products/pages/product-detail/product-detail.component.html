@@ -192,7 +192,7 @@
                         class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 text-right"
                       >
                         £{{
-                          item.quantity * (item.material.costPerUnit || 0)
+                          item.quantity * (item.material.averageCost || 0)
                             | number : "1.2-2"
                         }}
                       </td>
@@ -226,28 +226,28 @@
 
           <!-- Sidebar Info -->
           <div class="space-y-6">
-            <!-- Quick Sale -->
+            <!-- Quick Production -->
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
               <h3 class="text-lg font-medium text-amber-900 mb-4">
-                Quick Sale
+                Quick Production
               </h3>
               <div class="space-y-3">
                 <div>
                   <label
-                    for="saleQuantity"
+                    for="quantity"
                     class="block text-sm font-medium text-amber-800"
                     >Quantity</label
                   >
                   <input
                     type="number"
-                    id="saleQuantity"
-                    [(ngModel)]="saleQuantity"
+                    id="quantity"
+                    [(ngModel)]="quantity"
                     min="1"
                     class="mt-1 block w-full rounded-lg border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
                   />
                 </div>
                 <button
-                  (click)="recordSale()"
+                  (click)="recordProduction()"
                   [disabled]="saleLoading()"
                   class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
                 >
@@ -272,7 +272,7 @@
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Processing... } @else { Record Sale }
+                  Processing... } @else { Record Production }
                 </button>
               </div>
               @if (saleSuccess()) {
