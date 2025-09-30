@@ -5,26 +5,28 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { Material } from '../../../materials/models/material.model';
+import { ProductionBatch } from '../../../production/services/production.service';
 
-interface Material {
-  _id: string;
-  name: string;
-  sku: string;
-  currentStock: number;
-  minimumStock: number;
-  category: string;
-  unit: any;
-}
+// export interface Material {
+//   _id: string;
+//   name: string;
+//   sku: string;
+//   currentStock: number;
+//   minimumStock: number;
+//   category: string;
+//   unit: any;
+// }
 
-interface ProductionBatch {
-  _id: string;
-  product: any;
-  quantity: number;
-  batchNumber: string;
-  totalCost: number;
-  createdAt: string;
-  isReversed: boolean;
-}
+// interface ProductionBatch {
+//   _id: string;
+//   product: any;
+//   quantity: number;
+//   batchNumber: string;
+//   totalCost: number;
+//   createdAt: string;
+//   isReversed: boolean;
+// }
 
 interface ProductionStats {
   totalBatches: number;
