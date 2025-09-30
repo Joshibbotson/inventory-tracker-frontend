@@ -163,7 +163,7 @@ function passwordMatchValidator(
             </div>
 
             <!-- Business Name (Optional) -->
-            <div>
+            <!-- <div>
               <label
                 for="businessName"
                 class="block text-sm font-medium text-neutral-700"
@@ -179,7 +179,7 @@ function passwordMatchValidator(
                   class="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
                 />
               </div>
-            </div>
+            </div> -->
 
             <!-- Password -->
             <div>
