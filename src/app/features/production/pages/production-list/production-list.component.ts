@@ -1,5 +1,5 @@
 // production-list.component.ts
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +30,7 @@ export class ProductionListComponent implements OnInit {
   loading = signal(true);
   reversing = signal(false);
 
+  quantity = 0;
   reversalReason = '';
   reversalAttempted = false;
   selectedProduct = '';
@@ -80,6 +81,34 @@ export class ProductionListComponent implements OnInit {
         },
       });
   }
+
+  calculateReversedUnits = computed(() => {
+    return this.filteredBatches().reduce(
+      (sum, batch) => sum + batch.reversedQuantity,
+      0
+    );
+  });
+
+  calculateActiveUnits = computed(() => {
+    return this.filteredBatches().reduce(
+      (sum, batch) => sum + batch.quantity,
+      0
+    );
+  });
+
+  calculateReversedCost = computed(() => {
+    return this.filteredBatches().reduce(
+      (sum, batch) => sum + batch.reversedQuantity * batch.unitCost,
+      0
+    );
+  });
+
+  calculateActiveCost = computed(() => {
+    return this.filteredBatches().reduce(
+      (sum, batch) => sum + batch.totalCost,
+      0
+    );
+  });
 
   calculateTotalProduced(): number {
     return this.filteredBatches().reduce(
@@ -186,6 +215,7 @@ export class ProductionListComponent implements OnInit {
 
   initiateReversal(batch: ProductionBatch) {
     this.reversalBatch.set(batch);
+    this.quantity = 0;
     this.reversalReason = '';
     this.reversalAttempted = false;
 
@@ -208,6 +238,7 @@ export class ProductionListComponent implements OnInit {
     this.reversalBatch.set(null);
     this.reversalCheck.set(null);
     this.reversalReason = '';
+    this.quantity = 0;
     this.reversalAttempted = false;
   }
 
@@ -224,7 +255,7 @@ export class ProductionListComponent implements OnInit {
     this.reversing.set(true);
 
     this.productionService
-      .reverseBatch(batch._id, this.reversalReason)
+      .reverseBatch(batch._id, this.reversalReason, this.quantity)
       .subscribe({
         next: (result) => {
           this.reversing.set(false);

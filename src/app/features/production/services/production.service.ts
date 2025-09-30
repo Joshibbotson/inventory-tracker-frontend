@@ -20,6 +20,7 @@ export interface ProductionBatch {
   notes?: string;
   createdAt: string;
   isReversed?: boolean;
+  reversedQuantity: number;
   reversalReason?: string;
   reversedBy?: string;
   reversedAt?: string;
@@ -84,11 +85,12 @@ export class ProductionService {
 
   reverseBatch(
     batchId: string,
-    reason: string
+    reason: string,
+    quantity: number
   ): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
       `${this.apiUrl}/batch/${batchId}/reverse`,
-      { reason }
+      { reason, quantity }
     );
   }
 }

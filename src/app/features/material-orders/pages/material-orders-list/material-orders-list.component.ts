@@ -229,7 +229,7 @@ import {
         </div>
       </div>
       } @else {
-      <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div class="bg-white shadow-sm rounded-lg overflow-x-scroll">
         <table class="min-w-full divide-y divide-neutral-200">
           <thead class="bg-neutral-50">
             <tr>
