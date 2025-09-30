@@ -22,6 +22,18 @@ export class MaterialsService {
     return this.http.get<Material>(`${this.apiUrl}/${id}`);
   }
 
+  getCounts(): Observable<{
+    outOfStock: number;
+    lowStock: number;
+    totalMaterials: number;
+  }> {
+    return this.http.get<{
+      outOfStock: number;
+      lowStock: number;
+      totalMaterials: number;
+    }>(`${this.apiUrl}/total-counts`);
+  }
+
   // Create new material
   createMaterial(material: Partial<Material>): Observable<Material> {
     return this.http.post<Material>(this.apiUrl, material);
