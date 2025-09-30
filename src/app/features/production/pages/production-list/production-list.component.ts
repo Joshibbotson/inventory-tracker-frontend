@@ -215,7 +215,7 @@ export class ProductionListComponent implements OnInit {
 
   initiateReversal(batch: ProductionBatch) {
     this.reversalBatch.set(batch);
-    this.quantity = 0;
+    this.quantity = batch.quantity - batch.reversedQuantity;
     this.reversalReason = '';
     this.reversalAttempted = false;
 

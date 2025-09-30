@@ -439,7 +439,7 @@
               <p class="text-sm mt-1">This action will:</p>
               <ul class="text-sm mt-2 list-disc list-inside">
                 <li>
-                  Return {{ reversalBatch()!.quantity }} units of
+                  Return {{ quantity }} units of
                   {{ getProductName(reversalBatch()!.product) }} to materials
                 </li>
                 <li>Restore all materials used in production</li>
@@ -456,12 +456,14 @@
             Quantity <span class="text-red-500">*</span>
           </label>
           <input
-            class="block text-sm font-medium text-neutral-700 mb-2"
+            class="text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             [(ngModel)]="quantity"
             type="number"
             min="1"
-            [max]="selectedBatch()?.quantity ?? 0"
-            [defaultValue]="selectedBatch()?.quantity"
+            [max]="
+              reversalBatch()!.quantity - reversalBatch()!.reversedQuantity
+            "
+            [defaultValue]="reversalBatch()!.quantity"
           />
         </div>
 
