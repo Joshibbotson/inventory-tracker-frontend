@@ -305,7 +305,10 @@
           <td
             class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900"
           >
-            £{{ batch.totalCost | number : "1.2-2" }}
+            £{{
+              batch.totalCost - batch.reversedQuantity * batch.unitCost
+                | number : "1.2-2"
+            }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
             @if (batch.isReversed) {
