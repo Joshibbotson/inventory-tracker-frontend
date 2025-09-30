@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterLinkActive } from '@angular/router';
+import { RouterModule, RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 
 interface MenuItem {
@@ -13,7 +13,7 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RouterLink],
   templateUrl: './sidebar.component.html',
   styles: [],
 })

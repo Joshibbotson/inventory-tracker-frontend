@@ -1,1 +1,676 @@
-<p>production-list works!</p>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-neutral-900">Production Batches</h1>
+      <p class="mt-1 text-sm text-neutral-600">
+        Track finished goods production and material consumption
+      </p>
+    </div>
+    <div class="mt-4 sm:mt-0 flex gap-2">
+      <a
+        routerLink="/production/new"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+      >
+        <svg
+          class="mr-2 -ml-1 h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Create Batch
+      </a>
+      <button
+        (click)="exportBatches()"
+        class="inline-flex items-center px-4 py-2 border border-neutral-300 rounded-lg shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50"
+      >
+        <svg
+          class="mr-2 -ml-1 h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+          />
+        </svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-4 rounded-lg shadow-sm border border-neutral-200">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <!-- Product Filter -->
+      <div class="sm:col-span-2">
+        <label for="product" class="block text-sm font-medium text-neutral-700"
+          >Filter by Product</label
+        >
+        <select
+          id="product"
+          [(ngModel)]="selectedProduct"
+          (ngModelChange)="filterBatches()"
+          class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+        >
+          <option value="">All Products</option>
+          @for (product of products(); track product._id) {
+          <option [value]="product._id">
+            {{ product.name }} ({{ product.sku }})
+          </option>
+          }
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div>
+        <label
+          for="startDate"
+          class="block text-sm font-medium text-neutral-700"
+          >From Date</label
+        >
+        <input
+          type="date"
+          id="startDate"
+          [(ngModel)]="startDate"
+          (ngModelChange)="filterBatches()"
+          class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label for="endDate" class="block text-sm font-medium text-neutral-700"
+          >To Date</label
+        >
+        <input
+          type="date"
+          id="endDate"
+          [(ngModel)]="endDate"
+          (ngModelChange)="filterBatches()"
+          class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+      <dt class="text-sm font-medium text-neutral-500">Total Batches</dt>
+      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+        {{ filteredBatches().length }}
+      </dd>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+      <dt class="text-sm font-medium text-neutral-500">Total Units Produced</dt>
+      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+        {{ calculateTotalProduced() | number : "1.0-0" }}
+      </dd>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+      <dt class="text-sm font-medium text-neutral-500">Total Cost</dt>
+      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+        £{{ calculateTotalCost() | number : "1.2-2" }}
+      </dd>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+      <dt class="text-sm font-medium text-neutral-500">Avg Unit Cost</dt>
+      <dd class="mt-1 text-3xl font-semibold text-neutral-900">
+        £{{ calculateAverageUnitCost() | number : "1.2-2" }}
+      </dd>
+    </div>
+  </div>
+
+  <!-- Batches Table -->
+  @if (loading()) {
+  <div class="flex justify-center items-center h-64">
+    <svg
+      class="animate-spin h-8 w-8 text-amber-600"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  </div>
+  } @else if (filteredBatches().length === 0) {
+  <div
+    class="text-center py-12 bg-white rounded-lg border-2 border-dashed border-neutral-300"
+  >
+    <svg
+      class="mx-auto h-12 w-12 text-neutral-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+      />
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-neutral-900">
+      No production batches found
+    </h3>
+    <p class="mt-1 text-sm text-neutral-500">
+      Get started by creating your first production batch.
+    </p>
+    <div class="mt-6">
+      <a
+        routerLink="/production/new"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-amber-600 hover:bg-amber-700"
+      >
+        <svg
+          class="mr-2 -ml-1 h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Create Batch
+      </a>
+    </div>
+  </div>
+  } @else {
+  <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-neutral-200">
+      <thead class="bg-neutral-50">
+        <tr>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Date
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Batch Number
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Product
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Quantity
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Unit Cost
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Total Cost
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Status
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
+            Notes
+          </th>
+          <th class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-neutral-200">
+        @for (batch of filteredBatches(); track batch._id) {
+        <tr class="hover:bg-neutral-50" [class.bg-red-50]="batch.isReversed">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+            {{ formatDate(batch.createdAt) }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              [ngClass]="{
+                'bg-red-100 text-red-800': batch.isReversed,
+                'bg-amber-100 text-amber-800': !batch.isReversed
+              }"
+            >
+              {{ batch.batchNumber }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div>
+              <div class="text-sm font-medium text-neutral-900">
+                {{ getProductName(batch.product) }}
+              </div>
+              <div class="text-xs text-neutral-500">
+                {{ getProductSku(batch.product) }}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+            {{ batch.quantity }} units
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+            £{{ batch.unitCost | number : "1.2-2" }}
+          </td>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900"
+          >
+            £{{ batch.totalCost | number : "1.2-2" }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            @if (batch.isReversed) {
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+            >
+              <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Reversed
+            </span>
+            } @else {
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            >
+              <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Active
+            </span>
+            }
+          </td>
+          <td class="px-6 py-4 text-sm text-neutral-500">
+            <span class="truncate block max-w-xs" [title]="batch.notes || ''">
+              @if (batch.isReversed && batch.reversalReason) {
+              <span class="text-red-600"
+                >Reversed: {{ batch.reversalReason }}</span
+              >
+              } @else {
+              {{ batch.notes || "-" }}
+              }
+            </span>
+          </td>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+          >
+            <div class="flex items-center justify-end gap-2">
+              <button
+                (click)="viewBatchDetails(batch)"
+                class="text-amber-600 hover:text-amber-900"
+              >
+                View
+              </button>
+              @if (!batch.isReversed) {
+              <button
+                (click)="initiateReversal(batch)"
+                class="text-red-600 hover:text-red-900"
+              >
+                Reverse
+              </button>
+              }
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <!-- Reversal Modal -->
+  @if (reversalBatch()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div
+        class="fixed inset-0 bg-black opacity-30"
+        (click)="cancelReversal()"
+      ></div>
+      <div class="relative bg-white rounded-lg max-w-md w-full p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium text-neutral-900">
+            Reverse Production Batch
+          </h3>
+          <p class="text-sm text-neutral-500 mt-1">
+            {{ reversalBatch()!.batchNumber }}
+          </p>
+        </div>
+
+        @if (reversalCheck() && !reversalCheck()!.canReverse) {
+        <div
+          class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
+        >
+          <div class="flex">
+            <svg
+              class="h-5 w-5 text-red-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <span class="font-medium">Cannot Reverse</span>
+              <p class="text-sm mt-1">{{ reversalCheck()!.reason }}</p>
+            </div>
+          </div>
+        </div>
+        } @else {
+        <div
+          class="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg"
+        >
+          <div class="flex">
+            <svg
+              class="h-5 w-5 text-yellow-400 mr-2 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div>
+              <span class="font-medium">Warning</span>
+              <p class="text-sm mt-1">This action will:</p>
+              <ul class="text-sm mt-2 list-disc list-inside">
+                <li>
+                  Return {{ reversalBatch()!.quantity }} units of
+                  {{ getProductName(reversalBatch()!.product) }} to materials
+                </li>
+                <li>Restore all materials used in production</li>
+                <li>Adjust inventory values accordingly</li>
+              </ul>
+              <p class="text-sm mt-2 font-medium">
+                This action cannot be undone!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="reversalReason"
+            class="block text-sm font-medium text-neutral-700 mb-2"
+          >
+            Reversal Reason <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="reversalReason"
+            [(ngModel)]="reversalReason"
+            rows="3"
+            placeholder="Please explain why this production batch is being reversed..."
+            class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+            [class.border-red-500]="!reversalReason && reversalAttempted"
+          ></textarea>
+          @if (!reversalReason && reversalAttempted) {
+          <p class="mt-1 text-xs text-red-600">Reversal reason is required</p>
+          }
+        </div>
+        }
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+          <button
+            (click)="cancelReversal()"
+            class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg shadow-sm hover:bg-neutral-50"
+          >
+            Cancel
+          </button>
+          @if (reversalCheck()?.canReverse) {
+          <button
+            (click)="confirmReversal()"
+            [disabled]="reversing()"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (reversing()) {
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Reversing... } @else { Reverse Production }
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Batch Details Modal -->
+  @if (selectedBatch()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div
+        class="fixed inset-0 bg-black opacity-30"
+        (click)="selectedBatch.set(null)"
+      ></div>
+      <div
+        class="relative bg-white rounded-lg max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-medium text-neutral-900">
+              Production Batch Details
+            </h3>
+            <p class="text-sm text-neutral-500 mt-1">
+              {{ selectedBatch()!.batchNumber }}
+            </p>
+          </div>
+          <button
+            (click)="selectedBatch.set(null)"
+            class="text-neutral-400 hover:text-neutral-500"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Basic Info -->
+          <div>
+            <h4 class="text-sm font-medium text-neutral-900 mb-3">
+              Production Information
+            </h4>
+            <dl class="grid grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">Date</dt>
+                <dd class="mt-1 text-sm text-neutral-900">
+                  {{ formatDate(selectedBatch()!.createdAt) }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">Product</dt>
+                <dd class="mt-1 text-sm text-neutral-900">
+                  {{ getProductName(selectedBatch()!.product) }} ({{
+                    getProductSku(selectedBatch()!.product)
+                  }})
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">
+                  Quantity Produced
+                </dt>
+                <dd class="mt-1 text-sm text-neutral-900">
+                  {{ selectedBatch()!.quantity }} units
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-neutral-500">Unit Cost</dt>
+                <dd class="mt-1 text-sm text-neutral-900">
+                  £{{ selectedBatch()!.unitCost | number : "1.2-2" }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Material Costs Breakdown -->
+          <div>
+            <h4 class="text-sm font-medium text-neutral-900 mb-3">
+              Material Costs Breakdown
+            </h4>
+            <div
+              class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
+            >
+              <table class="min-w-full divide-y divide-neutral-300">
+                <thead class="bg-neutral-50">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      Material
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      Quantity Used
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      Unit Cost at Time
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      Total Cost
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200">
+                  @for (cost of selectedBatch()!.materialCosts; track $index) {
+                  <tr>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900"
+                    >
+                      {{ getMaterialName(cost.material) }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500"
+                    >
+                      {{ cost.quantity }}
+                      {{ getMaterialUnit(cost.material) }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500"
+                    >
+                      £{{ cost.unitCostAtTime | number : "1.2-2" }}
+                    </td>
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900"
+                    >
+                      £{{ cost.totalCost | number : "1.2-2" }}
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+                <tfoot class="bg-neutral-50">
+                  <tr>
+                    <td
+                      colspan="3"
+                      class="px-6 py-3 text-sm font-medium text-neutral-900"
+                    >
+                      Total Material Cost
+                    </td>
+                    <td class="px-6 py-3 text-sm font-bold text-neutral-900">
+                      £{{ selectedBatch()!.totalCost | number : "1.2-2" }}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          @if (selectedBatch()!.notes) {
+          <div>
+            <h4 class="text-sm font-medium text-neutral-900 mb-3">Notes</h4>
+            <p class="text-sm text-neutral-600 bg-neutral-50 p-4 rounded-lg">
+              {{ selectedBatch()!.notes }}
+            </p>
+          </div>
+          }
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button
+            (click)="selectedBatch.set(null)"
+            class="px-4 py-2 border border-neutral-300 rounded-lg shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

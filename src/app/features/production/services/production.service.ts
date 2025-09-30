@@ -19,6 +19,15 @@ export interface ProductionBatch {
   producedBy: string;
   notes?: string;
   createdAt: string;
+  isReversed?: boolean;
+  reversalReason?: string;
+  reversedBy?: string;
+  reversedAt?: string;
+}
+
+export interface ReversalCheck {
+  canReverse: boolean;
+  reason?: string;
 }
 
 export interface ProductionStats {
@@ -65,5 +74,21 @@ export class ProductionService {
 
   getProductionStats(productId: string): Observable<ProductionStats> {
     return this.http.get<ProductionStats>(`${this.apiUrl}/stats/${productId}`);
+  }
+
+  checkCanReverse(batchId: string): Observable<ReversalCheck> {
+    return this.http.get<ReversalCheck>(
+      `${this.apiUrl}/batch/${batchId}/can-reverse`
+    );
+  }
+
+  reverseBatch(
+    batchId: string,
+    reason: string
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}/batch/${batchId}/reverse`,
+      { reason }
+    );
   }
 }

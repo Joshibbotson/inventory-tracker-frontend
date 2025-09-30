@@ -170,7 +170,7 @@
     @for (product of filteredProducts(); track product._id) {
     <div
       [routerLink]="['/products', product._id]"
-      class="bg-white rounded-lg shadow-sm border border-neutral-200 hover:shadow-md transition-shadow"
+      class="cursor-pointer bg-white rounded-lg shadow-sm border border-neutral-200 hover:shadow-md transition-shadow"
     >
       <!-- Product Image -->
       <div

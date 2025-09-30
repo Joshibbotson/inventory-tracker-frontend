@@ -206,6 +206,7 @@
               >
                 <option value="">Select Material</option>
                 @for (material of materials(); track material._id) {
+                <!-- here we should pass material and then we can access it's unit -->
                 <option [value]="material._id">
                   {{ material.name }} ({{ material.sku }})
                 </option>
