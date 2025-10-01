@@ -4,11 +4,13 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MaterialsService } from '../../services/materials.service';
 import { Material } from '../../models/material.model';
+import { Pagination } from '../../../../core/types/Pagination';
+import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
 
 @Component({
   selector: 'app-material-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationFooterComponent],
   templateUrl: './material-list.component.html',
   styles: [],
 })
@@ -19,6 +21,11 @@ export class MaterialListComponent implements OnInit {
   filteredMaterials = signal<Material[]>([]);
   lowStockMaterials = signal<Material[]>([]);
   loading = signal(true);
+  pagination = signal<Pagination>({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   searchTerm = '';
   selectedCategory = '';
@@ -28,20 +35,27 @@ export class MaterialListComponent implements OnInit {
     this.loadMaterials();
   }
 
-  loadMaterials() {
+  loadMaterials(page = 1) {
     this.loading.set(true);
-    this.materialsService.getMaterials().subscribe({
-      next: (materials) => {
-        this.materials.set(materials);
-        this.filteredMaterials.set(materials);
-        this.updateLowStockList(materials);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading materials:', error);
-        this.loading.set(false);
-      },
-    });
+    this.materialsService
+      .getMaterials(this.pagination().page, this.pagination().pageSize)
+      .subscribe({
+        next: (res) => {
+          this.materials.set(res.data);
+          this.filteredMaterials.set(res.data);
+          this.updateLowStockList(res.data);
+          this.pagination.set({
+            page: res.page,
+            pageSize: res.pageSize,
+            total: res.total,
+          });
+          this.loading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading materials:', error);
+          this.loading.set(false);
+        },
+      });
   }
 
   filterMaterials() {
@@ -126,5 +140,35 @@ export class MaterialListComponent implements OnInit {
         },
       });
     }
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages()) {
+      return;
+    }
+
+    this.pagination.update((p) => ({ ...p, page }));
+    this.loadMaterials(page);
+  }
+
+  /**
+   * Calculate total number of pages
+   */
+  totalPages(): number {
+    const total = this.pagination().total;
+    const pageSize = this.pagination().pageSize;
+    return Math.ceil(total / pageSize);
+  }
+
+  /**
+   * Change page size (items per page)
+   */
+  changePageSize(newSize: number) {
+    this.pagination.update((p) => ({
+      ...p,
+      pageSize: newSize,
+      page: 1, // Reset to first page when changing page size
+    }));
+    this.loadMaterials(1);
   }
 }

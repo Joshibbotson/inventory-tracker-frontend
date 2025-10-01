@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Material } from '../../materials/models/material.model';
+import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 
 export interface MaterialOrder {
   _id?: string;
@@ -23,10 +24,17 @@ export class MaterialOrderService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/material-orders`;
 
-  getOrders(materialId?: string): Observable<MaterialOrder[]> {
-    return this.http.get<MaterialOrder[]>(this.apiUrl, {
-      params: materialId ? { materialId } : {},
-    });
+  getOrders(
+    page = 1,
+    pageSize = 10,
+    materialId?: string
+  ): Observable<PaginatedResponse<MaterialOrder>> {
+    return this.http.get<PaginatedResponse<MaterialOrder>>(
+      `${this.apiUrl}?page=${page}&pageSize=${pageSize}`,
+      {
+        params: materialId ? { materialId } : {},
+      }
+    );
   }
 
   getOrder(materialId?: string): Observable<MaterialOrder> {

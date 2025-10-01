@@ -61,7 +61,7 @@ export class MaterialOrderFormComponent {
 
   loadMaterials() {
     this.materialService.getMaterials().subscribe({
-      next: (materials) => this.materials.set(materials),
+      next: (materials) => this.materials.set(materials.data),
       error: (error) => console.error('Error loading materials:', error),
     });
   }

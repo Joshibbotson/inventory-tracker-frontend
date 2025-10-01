@@ -460,7 +460,7 @@ export class ProductionCreateComponent implements OnInit {
       ]);
 
       this.products.set(products || []);
-      this.materials.set(materials || []);
+      this.materials.set(materials?.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
     }

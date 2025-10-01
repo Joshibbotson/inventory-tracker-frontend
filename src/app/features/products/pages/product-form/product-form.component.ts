@@ -68,7 +68,7 @@ export class ProductFormComponent implements OnInit {
 
   loadMaterials() {
     this.materialsService.getMaterials().subscribe({
-      next: (materials) => this.materials.set(materials),
+      next: (materials) => this.materials.set(materials.data),
       error: (error) => console.error('Error loading materials:', error),
     });
   }

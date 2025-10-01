@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Material } from '../models/material.model';
 import { environment } from '../../../../environments/environment';
 import { StockAdjustment } from '../../sales/models/StockAdjustment.model';
+import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -13,8 +14,13 @@ export class MaterialsService {
   private readonly http = inject(HttpClient);
 
   // Get all materials
-  getMaterials(): Observable<Material[]> {
-    return this.http.get<Material[]>(this.apiUrl);
+  getMaterials(
+    page = 1,
+    pageSize = 10
+  ): Observable<PaginatedResponse<Material>> {
+    return this.http.get<PaginatedResponse<Material>>(
+      `${this.apiUrl}?page=${page}&pageSize=${pageSize}`
+    );
   }
 
   // Get single material by ID
