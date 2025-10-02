@@ -65,7 +65,7 @@
         </span>
         } @else if(typeof page === 'number') {
         <button
-          (click)="goToPage(page)"
+          (click)="goToPage($any(page))"
           [class.bg-amber-600]="page === pagination().page"
           [class.text-white]="page === pagination().page"
           [class.text-neutral-900]="page !== pagination().page"
@@ -75,7 +75,6 @@
           {{ page }}
         </button>
         } }
-
         <!-- Next Button -->
         <button
           (click)="goToPage(pagination().page + 1)"
