@@ -14,11 +14,12 @@ import { UnitsService } from '../../../units/services/units.service';
 import { Product } from '../../models/product.model';
 import { Material } from '../../../materials/models/material.model';
 import { Unit } from '../../../units/models/Unit.model';
+import { MaterialSearchComponent } from '../../../materials/components/material-search/material-search.component';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MaterialSearchComponent],
   templateUrl: './product-form.component.html',
   styles: [],
 })
@@ -123,6 +124,34 @@ export class ProductFormComponent implements OnInit {
         this.navigateBack();
       },
     });
+  }
+
+  onMaterialSelected(material: Material, recipeIndex: number) {
+    const recipeItem = this.recipeItems.at(recipeIndex);
+
+    // Set the material ID
+    recipeItem.patchValue({
+      material: material._id,
+      // Auto-populate unit from material
+      unit: material.unit._id,
+    });
+  }
+
+  getSelectedMaterial(index: number): Material | undefined {
+    const materialId = this.recipeItems.at(index)?.get('material')?.value;
+    return this.materials().find((m) => m._id === materialId);
+  }
+
+  getSelectedMaterialUnit(index: number): string {
+    const selectedMaterial = this.getSelectedMaterial(index);
+    if (!selectedMaterial) return '';
+
+    if (typeof selectedMaterial.unit === 'object') {
+      return selectedMaterial.unit.name || '';
+    }
+
+    const unit = this.units().find((u) => u._id === selectedMaterial.unit._id);
+    return unit?.name || '';
   }
 
   createRecipeItem(

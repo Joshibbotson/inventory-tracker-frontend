@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Material } from '../../../materials/models/material.model';
 import { ProductionBatch } from '../../../production/services/production.service';
+import { PaginatedResponse } from '../../../../core/types/PaginatedResponse';
 
 // export interface Material {
 //   _id: string;
@@ -131,7 +132,9 @@ export class DashboardComponent implements OnInit {
 
       // Load all data in parallel
       const [materials, materialsStats, productionHistory] = await Promise.all([
-        firstValueFrom(this.http.get<Material[]>(`${this.apiUrl}/materials`)),
+        firstValueFrom(
+          this.http.get<PaginatedResponse<Material>>(`${this.apiUrl}/materials`)
+        ),
         firstValueFrom(
           this.http.get<any>(`${this.apiUrl}/materials/statistics`)
         ),
@@ -145,10 +148,10 @@ export class DashboardComponent implements OnInit {
       ]);
 
       // Process materials for low stock
-      const lowStock = materials.filter(
+      const lowStock = materials.data.filter(
         (m) => m.currentStock > 0 && m.currentStock <= m.minimumStock
       );
-      const outOfStock = materials.filter((m) => m.currentStock === 0);
+      const outOfStock = materials.data.filter((m) => m.currentStock === 0);
 
       this.lowStockMaterials.set(lowStock);
       this.outOfStockMaterials.set(outOfStock);
@@ -170,7 +173,7 @@ export class DashboardComponent implements OnInit {
 
       // Update stats
       this.stats.set({
-        totalMaterials: materials.length,
+        totalMaterials: materials.total,
         totalProducts: materialsStats.totalMaterials || 0,
         lowStockCount: lowStock.length,
         outOfStockCount: outOfStock.length,

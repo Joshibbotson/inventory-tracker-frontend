@@ -13,10 +13,16 @@ import {
 } from '../../services/material-order.service';
 import { Material } from '../../../materials/models/material.model';
 import { MaterialsService } from '../../../materials/services/materials.service';
+import { MaterialSearchComponent } from '../../../materials/components/material-search/material-search.component';
 
 @Component({
   selector: 'app-material-order-form',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MaterialSearchComponent,
+  ],
   templateUrl: './material-order-form.component.html',
   styleUrl: './material-order-form.component.scss',
 })
@@ -124,5 +130,9 @@ export class MaterialOrderFormComponent {
     } else {
       this.materialOrderForm.markAllAsTouched();
     }
+  }
+
+  onMaterialSelected(material: Material) {
+    this.materialOrderForm.patchValue({ material: material._id });
   }
 }

@@ -201,21 +201,20 @@
             [formGroupName]="i"
             class="flex gap-3 p-4 bg-neutral-50 rounded-lg"
           >
-            <!-- Material Select -->
+            <!-- Material Search with initial value -->
             <div class="flex-1">
               <label class="sr-only">Material</label>
-              <select
-                formControlName="material"
-                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
-              >
-                <option value="">Select Material</option>
-                @for (material of materials(); track material._id) {
-                <!-- here we should pass material and then we can access it's unit -->
-                <option [value]="material._id">
-                  {{ material.name }} ({{ material.sku }})
-                </option>
-                }
-              </select>
+              <app-material-search
+                [initialMaterialId]="item.get('material')?.value || ''"
+                (materialSelected)="onMaterialSelected($event, i)"
+              />
+
+              <!-- Hidden field to store the selected material ID for form validation -->
+              <input type="hidden" formControlName="material" />
+
+              @if (hasRecipeItemError(i, 'material')) {
+              <p class="mt-1 text-xs text-red-600">Material is required</p>
+              }
             </div>
 
             <!-- Quantity -->
@@ -228,21 +227,25 @@
                 min="0"
                 placeholder="Qty"
                 class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+                [class.border-red-500]="hasRecipeItemError(i, 'quantity')"
               />
+              @if (hasRecipeItemError(i, 'quantity')) {
+              <p class="mt-1 text-xs text-red-600">Quantity is required</p>
+              }
             </div>
 
-            <!-- Unit Select -->
+            <!-- Unit - Auto-populated from selected material -->
             <div class="w-32">
               <label class="sr-only">Unit</label>
-              <select
-                formControlName="unit"
-                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
-              >
-                <option value="">Select Unit</option>
-                @for (unit of units(); track unit._id) {
-                <option [value]="unit._id">{{ unit.name }}</option>
-                }
-              </select>
+              <input
+                type="text"
+                [value]="getSelectedMaterialUnit(i)"
+                readonly
+                placeholder="Unit"
+                class="block w-full rounded-lg border-neutral-300 bg-neutral-50 shadow-sm sm:text-sm cursor-not-allowed"
+              />
+              <!-- Hidden field for form -->
+              <input type="hidden" formControlName="unit" />
             </div>
 
             <!-- Remove Button -->
