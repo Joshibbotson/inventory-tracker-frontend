@@ -1,11 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MaterialsService } from '../../services/materials.service';
-import { Material } from '../../models/material.model';
+import { Material, MaterialCategory } from '../../models/material.model';
 import { Pagination } from '../../../../core/types/Pagination';
 import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { StockLevel } from '../../enums/StockLevel.enum';
 
 @Component({
   selector: 'app-material-list',
@@ -16,9 +19,9 @@ import { PaginationFooterComponent } from '../../../../core/components/paginatio
 })
 export class MaterialListComponent implements OnInit {
   private materialsService = inject(MaterialsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   materials = signal<Material[]>([]);
-  filteredMaterials = signal<Material[]>([]);
   lowStockMaterials = signal<Material[]>([]);
   loading = signal(true);
   pagination = signal<Pagination>({
@@ -26,23 +29,102 @@ export class MaterialListComponent implements OnInit {
     pageSize: 10,
     total: 0,
   });
+  searchQuery = signal('');
 
   searchTerm = '';
-  selectedCategory = '';
-  stockFilter = '';
+  selectedCategory: MaterialCategory | '' = '';
+  stockFilter: StockLevel | '' = '';
+
+  search = new Subject<string>();
+  filterChange = new Subject<void>();
 
   ngOnInit() {
     this.loadMaterials();
+    this.initSearchListener();
+    this.initFilterListener();
+  }
+
+  initSearchListener(): void {
+    this.search
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe({
+        next: (searchTerm) => {
+          this.searchTerm = searchTerm;
+          this.loadMaterials(1); // Reset to page 1 on search
+        },
+        error: (err) => {
+          console.error('Search error:', err);
+        },
+      });
+  }
+
+  initFilterListener(): void {
+    this.filterChange
+      .pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100))
+      .subscribe({
+        next: () => {
+          this.loadMaterials(1); // Reset to page 1 on filter change
+        },
+      });
+  }
+
+  resetFilters() {
+    this.searchTerm = '';
+    this.searchQuery.set('');
+    this.selectedCategory = '';
+    this.stockFilter = '';
+    this.loadMaterials(1);
+  }
+
+  // Helper to check if any filters are active
+  hasActiveFilters(): boolean {
+    return !!(this.searchTerm || this.selectedCategory || this.stockFilter);
+  }
+
+  handleSearchChange(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+    this.search.next(value);
+  }
+
+  onCategoryChange() {
+    this.filterChange.next();
+  }
+
+  onStockFilterChange() {
+    this.filterChange.next();
   }
 
   loadMaterials(page = 1) {
     this.loading.set(true);
+
+    const opts: {
+      searchTerm?: string;
+      category?: MaterialCategory;
+      stockLevel?: StockLevel;
+    } = {};
+
+    if (this.searchTerm) {
+      opts.searchTerm = this.searchTerm;
+    }
+
+    if (this.selectedCategory) {
+      opts.category = this.selectedCategory as MaterialCategory;
+    }
+
+    if (this.stockFilter) {
+      opts.stockLevel = this.stockFilter as StockLevel;
+    }
+
     this.materialsService
-      .getMaterials(this.pagination().page, this.pagination().pageSize)
+      .getMaterials(page, this.pagination().pageSize, opts)
       .subscribe({
         next: (res) => {
           this.materials.set(res.data);
-          this.filteredMaterials.set(res.data);
           this.updateLowStockList(res.data);
           this.pagination.set({
             page: res.page,
@@ -56,42 +138,6 @@ export class MaterialListComponent implements OnInit {
           this.loading.set(false);
         },
       });
-  }
-
-  filterMaterials() {
-    let filtered = this.materials();
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (m) =>
-          m.name.toLowerCase().includes(term) ||
-          m.sku.toLowerCase().includes(term) ||
-          m.supplier?.toLowerCase().includes(term)
-      );
-    }
-
-    if (this.selectedCategory) {
-      filtered = filtered.filter((m) => m.category === this.selectedCategory);
-    }
-
-    if (this.stockFilter) {
-      switch (this.stockFilter) {
-        case 'low':
-          filtered = filtered.filter(
-            (m) => this.isLowStock(m) && m.currentStock > 0
-          );
-          break;
-        case 'out':
-          filtered = filtered.filter((m) => m.currentStock === 0);
-          break;
-        case 'ok':
-          filtered = filtered.filter((m) => !this.isLowStock(m));
-          break;
-      }
-    }
-
-    this.filteredMaterials.set(filtered);
   }
 
   isLowStock(material: Material): boolean {
@@ -119,7 +165,7 @@ export class MaterialListComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.loadMaterials();
+          this.loadMaterials(this.pagination().page);
         },
         error: (error) => {
           console.error('Error adjusting stock:', error);
@@ -132,7 +178,7 @@ export class MaterialListComponent implements OnInit {
     if (confirm(`Are you sure you want to delete "${material.name}"?`)) {
       this.materialsService.deleteMaterial(material._id).subscribe({
         next: () => {
-          this.loadMaterials();
+          this.loadMaterials(this.pagination().page);
         },
         error: (error) => {
           console.error('Error deleting material:', error);
@@ -151,23 +197,17 @@ export class MaterialListComponent implements OnInit {
     this.loadMaterials(page);
   }
 
-  /**
-   * Calculate total number of pages
-   */
   totalPages(): number {
     const total = this.pagination().total;
     const pageSize = this.pagination().pageSize;
     return Math.ceil(total / pageSize);
   }
 
-  /**
-   * Change page size (items per page)
-   */
   changePageSize(newSize: number) {
     this.pagination.update((p) => ({
       ...p,
       pageSize: newSize,
-      page: 1, // Reset to first page when changing page size
+      page: 1,
     }));
     this.loadMaterials(1);
   }

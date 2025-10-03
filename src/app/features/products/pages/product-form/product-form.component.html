@@ -38,6 +38,7 @@
       <div class="space-y-4">
         <h2 class="text-lg font-medium text-neutral-900">Basic Information</h2>
 
+        <app-image-uploader (fileOutput)="handleFileUpload($event)" />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <!-- Product Name -->
           <div>

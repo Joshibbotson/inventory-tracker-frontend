@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { ProductsService } from '../../services/products.service';
 import { Product } from '../../models/product.model';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-product-list',
@@ -25,6 +26,7 @@ export class ProductListComponent implements OnInit {
   searchTerm = '';
   selectedCategory = '';
   selectedStatus = '';
+  serverUrlPref = environment.apiUrl;
 
   ngOnInit() {
     this.loadProducts();

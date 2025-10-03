@@ -107,9 +107,9 @@
             >
               @if (product()!.imageUrl) {
               <img
-                [src]="product()!.imageUrl"
+                [src]="serverUrlPref + product()!.imageUrl"
                 [alt]="product()!.name"
-                class="h-full w-full object-cover object-center"
+                class="h-50 w-50 object-cover object-center"
               />
               } @else {
               <div

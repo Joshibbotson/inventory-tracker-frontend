@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
 import { environment } from '../../../../environments/environment';
@@ -19,12 +19,55 @@ export class ProductsService {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  createProduct(product: Partial<Product>): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product);
+  searchProducts(query: string): Observable<Product[]> {
+    const params = new HttpParams().set('q', query);
+    return this.http.get<Product[]>(`${this.apiUrl}/search`, { params });
   }
 
-  updateProduct(id: string, product: Partial<Product>): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/${id}`, product);
+  createProduct(
+    product: Partial<Product>,
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+
+    // Append the file
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    // Append product data as a JSON blob (proper JSON, not stringified fields)
+    formData.append(
+      'product',
+      new Blob([JSON.stringify(product)], {
+        type: 'application/json',
+      })
+    );
+
+    return this.http.post<Product>(this.apiUrl, formData);
+  }
+
+  updateProduct(
+    id: string,
+    product: Partial<Product>,
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+
+    // Append the file if provided
+    if (imageFile) {
+      formData.append('image', imageFile);
+      console.log('Appending image file:', imageFile.name); // Debug
+    }
+
+    // Append product data
+    formData.append(
+      'product',
+      new Blob([JSON.stringify(product)], {
+        type: 'application/json',
+      })
+    );
+
+    return this.http.put<Product>(`${this.apiUrl}/${id}`, formData);
   }
 
   deleteProduct(id: string): Observable<void> {

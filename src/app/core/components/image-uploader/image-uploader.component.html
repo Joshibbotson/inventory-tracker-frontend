@@ -1,0 +1,25 @@
+<div
+  class="border border-neutral-500 p-6 border-dashed flex flex-col items-center justify-center"
+>
+  @if (selectedImage()) {
+  <button
+    (click)="resetSelectedImage()"
+    type="button"
+    class="text-red-600 hover:text-red-900"
+  >
+    remove image
+  </button>
+  }
+  <input
+    #fileInput
+    (input)="handleFileUpload($event)"
+    type="file"
+    name="imageUpload"
+    id="imageUpload"
+    [hidden]="imageUrl()"
+  />
+  @if (imageUrl()) {
+
+  <img id="imagePreview" [src]="imageUrl()" alt="Image Preview" width="300" />
+  }
+</div>

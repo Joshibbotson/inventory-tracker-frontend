@@ -6,6 +6,7 @@ import { SalesService } from '../../../sales/services/sales.service';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../models/product.model';
 import { ProductionService } from '../../../production/services/production.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-product-detail',
@@ -26,6 +27,8 @@ export class ProductDetailComponent implements OnInit {
   saleLoading = signal(false);
   saleSuccess = signal(false);
   quantity = 1;
+
+  serverUrlPref = environment.apiUrl;
 
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('id');

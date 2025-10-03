@@ -15,11 +15,17 @@ import { Product } from '../../models/product.model';
 import { Material } from '../../../materials/models/material.model';
 import { Unit } from '../../../units/models/Unit.model';
 import { MaterialSearchComponent } from '../../../materials/components/material-search/material-search.component';
+import { ImageUploaderComponent } from '../../../../core/components/image-uploader/image-uploader.component';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MaterialSearchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MaterialSearchComponent,
+    ImageUploaderComponent,
+  ],
   templateUrl: './product-form.component.html',
   styles: [],
 })
@@ -34,6 +40,7 @@ export class ProductFormComponent implements OnInit {
   loading = signal(false);
   materials = signal<Material[]>([]);
   units = signal<Unit[]>([]);
+  selectedImage = signal<File | undefined>(undefined);
 
   isEditMode = false;
   productId: string | null = null;
@@ -137,6 +144,10 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  handleFileUpload(file: File) {
+    this.selectedImage.set(file);
+  }
+
   getSelectedMaterial(index: number): Material | undefined {
     const materialId = this.recipeItems.at(index)?.get('material')?.value;
     return this.materials().find((m) => m._id === materialId);
@@ -216,9 +227,13 @@ export class ProductFormComponent implements OnInit {
         this.isEditMode && this.productId
           ? this.productsService.updateProduct(
               this.productId,
-              productData as Partial<Product>
+              productData as Partial<Product>,
+              this.selectedImage()
             )
-          : this.productsService.createProduct(productData as Partial<Product>);
+          : this.productsService.createProduct(
+              productData as Partial<Product>,
+              this.selectedImage()
+            );
 
       request.subscribe({
         next: (product) => {

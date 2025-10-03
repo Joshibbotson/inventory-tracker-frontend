@@ -178,7 +178,7 @@
       >
         @if (product.imageUrl) {
         <img
-          [src]="product.imageUrl"
+          [src]="serverUrlPref + product.imageUrl"
           [alt]="product.name"
           class="h-48 w-full object-cover object-center"
         />

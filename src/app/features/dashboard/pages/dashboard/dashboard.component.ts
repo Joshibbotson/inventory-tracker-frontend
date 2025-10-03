@@ -133,7 +133,10 @@ export class DashboardComponent implements OnInit {
       // Load all data in parallel
       const [materials, materialsStats, productionHistory] = await Promise.all([
         firstValueFrom(
-          this.http.get<PaginatedResponse<Material>>(`${this.apiUrl}/materials`)
+          this.http.post<PaginatedResponse<Material>>( // this will need to be changed
+            `${this.apiUrl}/materials/find-all`, // we'll need to fetch all stats
+            {}
+          )
         ),
         firstValueFrom(
           this.http.get<any>(`${this.apiUrl}/materials/statistics`)

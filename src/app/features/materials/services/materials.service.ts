@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Material } from '../models/material.model';
+import { Material, MaterialCategory } from '../models/material.model';
 import { environment } from '../../../../environments/environment';
 import { StockAdjustment } from '../../sales/models/StockAdjustment.model';
 import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
+import { StockLevel } from '../enums/StockLevel.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -13,13 +14,18 @@ export class MaterialsService {
   private readonly apiUrl = `${environment.apiUrl}/materials`;
   private readonly http = inject(HttpClient);
 
-  // Get all materials
   getMaterials(
     page = 1,
-    pageSize = 10
+    pageSize = 10,
+    opts?: {
+      searchTerm?: string;
+      category?: MaterialCategory;
+      stockLevel?: StockLevel;
+    }
   ): Observable<PaginatedResponse<Material>> {
-    return this.http.get<PaginatedResponse<Material>>(
-      `${this.apiUrl}?page=${page}&pageSize=${pageSize}`
+    return this.http.post<PaginatedResponse<Material>>(
+      `${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`,
+      opts
     );
   }
 
