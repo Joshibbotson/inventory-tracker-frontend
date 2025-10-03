@@ -282,6 +282,12 @@
           >
             <div class="flex items-center justify-end gap-2">
               <button
+                [routerLink]="'/material-orders/' + order._id + '/edit'"
+                class="text-amber-600 hover:text-amber-900"
+              >
+                Edit
+              </button>
+              <button
                 (click)="viewOrderDetails(order)"
                 class="text-amber-600 hover:text-amber-900"
               >
