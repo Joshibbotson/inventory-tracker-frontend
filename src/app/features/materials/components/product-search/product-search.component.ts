@@ -17,6 +17,7 @@ import {
 } from 'rxjs';
 import { ProductsService } from '../../../products/services/products.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-product-search',
@@ -28,6 +29,8 @@ export class ProductSearchComponent {
   private readonly productService = inject(ProductsService);
   private readonly destroyRef = inject(DestroyRef);
   initialProductId = input<string>('');
+
+  backendUrl = environment.apiUrl;
 
   searchQuery = signal('');
   products = signal<Product[]>([]);

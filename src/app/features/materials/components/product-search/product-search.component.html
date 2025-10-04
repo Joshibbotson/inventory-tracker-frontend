@@ -108,11 +108,20 @@
             }
           </div>
 
-          <div class="ml-3 text-right">
-            <div class="text-sm font-semibold text-neutral-900">
-              £{{ product.sellingPrice.toFixed(2) }}
+          <div class="flex">
+            @if (product.imageUrl) {
+            <img
+              [src]="backendUrl + product.imageUrl"
+              alt="image of product"
+              width="60"
+            />
+            }
+            <div class="ml-3 text-right">
+              <div class="text-sm font-semibold text-neutral-900">
+                £{{ product.sellingPrice.toFixed(2) }}
+              </div>
+              <div class="text-xs text-neutral-500">per unit</div>
             </div>
-            <div class="text-xs text-neutral-500">per unit</div>
           </div>
         </div>
 
