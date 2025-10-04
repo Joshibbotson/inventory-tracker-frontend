@@ -47,11 +47,12 @@ export class ProductFormComponent implements OnInit {
 
   productForm = this.fb.group({
     name: ['', [Validators.required]],
-    sku: ['', [Validators.required]],
+    // sku: ['', [Validators.required]],
     description: [''],
     sellingPrice: [0, [Validators.required, Validators.min(0)]],
     status: ['active'],
     category: ['regular'],
+    imageUrl: '',
     recipe: this.fb.array([]),
   });
 
@@ -97,11 +98,12 @@ export class ProductFormComponent implements OnInit {
         // Populate basic fields
         this.productForm.patchValue({
           name: product.name,
-          sku: product.sku,
+          // sku: product.sku,
           description: product.description,
           sellingPrice: product.sellingPrice,
           status: product.status,
           category: product.category,
+          imageUrl: product.imageUrl,
         });
 
         // Clear and rebuild recipe array
@@ -262,9 +264,9 @@ export class ProductFormComponent implements OnInit {
       if (this.productForm.get('name')?.invalid) {
         errors.push('Product name is required');
       }
-      if (this.productForm.get('sku')?.invalid) {
-        errors.push('SKU is required');
-      }
+      // if (this.productForm.get('sku')?.invalid) {
+      //   errors.push('SKU is required');
+      // }
       if (this.productForm.get('sellingPrice')?.invalid) {
         errors.push('Valid selling price is required');
       }

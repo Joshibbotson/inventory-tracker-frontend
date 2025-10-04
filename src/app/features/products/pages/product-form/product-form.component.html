@@ -38,7 +38,10 @@
       <div class="space-y-4">
         <h2 class="text-lg font-medium text-neutral-900">Basic Information</h2>
 
-        <app-image-uploader (fileOutput)="handleFileUpload($event)" />
+        <app-image-uploader
+          (fileOutput)="handleFileUpload($event)"
+          [existingImage]="productForm.get('imageUrl')?.value"
+        />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <!-- Product Name -->
           <div>
@@ -62,7 +65,7 @@
           </div>
 
           <!-- SKU -->
-          <div>
+          <!-- <div>
             <label for="sku" class="block text-sm font-medium text-neutral-700"
               >SKU</label
             >
@@ -81,7 +84,7 @@
             productForm.get('sku')?.touched) {
             <p class="mt-1 text-xs text-red-600">SKU is required</p>
             }
-          </div>
+          </div> -->
 
           <!-- Category -->
           <div>

@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 
 export interface ProductionBatch {
   _id: string;
@@ -29,6 +30,14 @@ export interface ProductionBatch {
   wasteReason?: string;
   wasteBy?: string;
   wasteAt?: string;
+}
+export interface BatchSummary {
+  summary: {
+    activeUnits: number;
+    reversedUnits: number;
+    activeCost: number;
+    reversedCost: number;
+  };
 }
 
 export interface ReversalCheck {
@@ -64,18 +73,18 @@ export class ProductionService {
   }
 
   getProductionHistory(
-    productId?: string,
-    startDate?: string,
-    endDate?: string
-  ): Observable<ProductionBatch[]> {
-    let params = new HttpParams();
-    if (productId) params = params.set('productId', productId);
-    if (startDate) params = params.set('startDate', startDate);
-    if (endDate) params = params.set('endDate', endDate);
-
-    return this.http.get<ProductionBatch[]>(`${this.apiUrl}/history`, {
-      params,
-    });
+    page = 1,
+    pageSize = 10,
+    opts?: {
+      searchTerm?: string;
+      startDate?: string;
+      endDate?: string;
+    }
+  ): Observable<PaginatedResponse<ProductionBatch> & BatchSummary> {
+    return this.http.post<PaginatedResponse<ProductionBatch> & BatchSummary>(
+      `${this.apiUrl}/history/?page=${page}&pageSize=${pageSize}`,
+      opts
+    );
   }
 
   getProductionStats(productId: string): Observable<ProductionStats> {

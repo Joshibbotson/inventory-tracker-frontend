@@ -1,5 +1,5 @@
 // production-list.component.ts
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,10 @@ import {
 } from '../../services/production.service';
 import { ReversalModalComponent } from '../../components/reversal-modal/reversal-modal.component';
 import { WasteModalComponent } from '../../components/waste-modal/waste-modal.component';
+import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
+import { Pagination } from '../../../../core/types/Pagination';
+import { debounceTime, distinctUntilChanged, forkJoin, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-production-list',
@@ -21,16 +25,16 @@ import { WasteModalComponent } from '../../components/waste-modal/waste-modal.co
     FormsModule,
     ReversalModalComponent,
     WasteModalComponent,
+    PaginationFooterComponent,
   ],
   templateUrl: './production-list.component.html',
   styles: [],
 })
 export class ProductionListComponent implements OnInit {
-  private productionService = inject(ProductionService);
-  private productsService = inject(ProductsService);
+  private readonly productionService = inject(ProductionService);
+  private readonly destroyRef = inject(DestroyRef);
 
   batches = signal<ProductionBatch[]>([]);
-  filteredBatches = signal<ProductionBatch[]>([]);
   products = signal<Product[]>([]);
   selectedBatch = signal<ProductionBatch | null>(null);
   reversalBatch = signal<ProductionBatch | null>(null);
@@ -39,102 +43,104 @@ export class ProductionListComponent implements OnInit {
   loading = signal(true);
   reversing = signal(false);
   wasting = signal(false);
+  pagination = signal<Pagination>({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   selectedProduct = '';
   startDate = '';
   endDate = '';
+  searchQuery = signal('');
+
+  // Summary stats from backend
+  totalActiveUnits = signal(0);
+  totalReversedUnits = signal(0);
+  totalActiveCost = signal(0);
+  totalReversedCost = signal(0);
+
+  searchTerm = '';
+  search = new Subject<string>();
+  filterChange = new Subject<void>();
 
   ngOnInit() {
     this.loadData();
+    this.initSearchListener();
+    this.initFilterListener();
   }
 
-  async loadData() {
-    this.loading.set(true);
-
-    try {
-      const [batches, products] = await Promise.all([
-        this.productionService.getProductionHistory().toPromise(),
-        this.productsService.getProducts().toPromise(),
-      ]);
-
-      this.batches.set(batches || []);
-      this.filteredBatches.set(batches || []);
-      this.products.set(products?.data || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  filterBatches() {
-    this.loading.set(true);
-
-    this.productionService
-      .getProductionHistory(
-        this.selectedProduct || undefined,
-        this.startDate || undefined,
-        this.endDate || undefined
+  initSearchListener(): void {
+    this.search
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        debounceTime(300),
+        distinctUntilChanged()
       )
       .subscribe({
-        next: (batches) => {
-          this.batches.set(batches);
-          this.filteredBatches.set(batches);
-          this.loading.set(false);
+        next: (searchTerm) => {
+          this.searchTerm = searchTerm;
+          this.loadData(1); // Reset to page 1 on search
         },
-        error: (error) => {
-          console.error('Error filtering batches:', error);
-          this.loading.set(false);
+        error: (err) => {
+          console.error('Search error:', err);
         },
       });
   }
 
-  calculateReversedUnits = computed(() => {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.reversedQuantity,
-      0
-    );
-  });
-
-  calculateActiveUnits = computed(() => {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.quantity,
-      0
-    );
-  });
-
-  calculateReversedCost = computed(() => {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.reversedQuantity * batch.unitCost,
-      0
-    );
-  });
-
-  calculateActiveCost = computed(() => {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.totalCost,
-      0
-    );
-  });
-
-  calculateTotalProduced(): number {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.quantity,
-      0
-    );
+  initFilterListener(): void {
+    this.filterChange
+      .pipe(takeUntilDestroyed(this.destroyRef), debounceTime(100))
+      .subscribe({
+        next: () => {
+          this.loadData(1); // Reset to page 1 on filter change
+        },
+      });
   }
 
-  calculateTotalCost(): number {
-    return this.filteredBatches().reduce(
-      (sum, batch) => sum + batch.totalCost,
-      0
-    );
+  async loadData(page = 1) {
+    this.loading.set(true);
+
+    this.productionService
+      .getProductionHistory(page, this.pagination().pageSize, {
+        searchTerm: this.searchQuery(),
+        startDate: this.startDate,
+        endDate: this.endDate,
+      })
+      .subscribe({
+        next: (res) => {
+          this.batches.set(res.data || []);
+          this.pagination.set({
+            page: res.page,
+            pageSize: res.pageSize,
+            total: res.total,
+          });
+
+          // Update summary stats if provided by backend
+          if (res.summary) {
+            this.totalActiveUnits.set(res.summary.activeUnits || 0);
+            this.totalReversedUnits.set(res.summary.reversedUnits || 0);
+            this.totalActiveCost.set(res.summary.activeCost || 0);
+            this.totalReversedCost.set(res.summary.reversedCost || 0);
+          }
+        },
+        error: (err) => {
+          console.error('Error loading data:', err);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
-  calculateAverageUnitCost(): number {
-    const total = this.calculateTotalCost();
-    const units = this.calculateTotalProduced();
-    return units > 0 ? total / units : 0;
+  handleSearchChange(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+    this.search.next(value);
+  }
+
+  filterBatches() {
+    this.pagination.update((p) => ({ ...p, page: 1 }));
+    this.loadData(1);
   }
 
   getProductName(product: any): string {
@@ -193,7 +199,7 @@ export class ProductionListComponent implements OnInit {
       'Total Cost',
       'Notes',
     ];
-    const rows = this.filteredBatches().map((batch) => [
+    const rows = this.batches().map((batch) => [
       this.formatDate(batch.createdAt),
       batch.batchNumber,
       this.getProductName(batch.product),
@@ -222,16 +228,13 @@ export class ProductionListComponent implements OnInit {
 
   initiateWaste(batch: ProductionBatch, e: Event) {
     e.stopPropagation();
-
     this.wasteBatch.set(batch);
   }
 
   initiateReversal(batch: ProductionBatch, e: Event) {
     e.stopPropagation();
-
     this.reversalBatch.set(batch);
 
-    // Check if can reverse
     this.productionService.checkCanReverse(batch._id).subscribe({
       next: (check) => {
         this.reversalCheck.set(check);
@@ -253,7 +256,6 @@ export class ProductionListComponent implements OnInit {
 
   confirmReversal(wasteOpts: { quantity: number; reversalReason: string }) {
     const { quantity, reversalReason } = wasteOpts;
-
     const batch = this.reversalBatch();
     if (!batch) return;
 
@@ -265,12 +267,8 @@ export class ProductionListComponent implements OnInit {
         next: (result) => {
           this.reversing.set(false);
           this.cancelReversal();
-
-          // Show success message
           alert(result.message);
-
-          // Reload data
-          this.loadData();
+          this.loadData(this.pagination().page);
         },
         error: (error) => {
           this.reversing.set(false);
@@ -291,11 +289,10 @@ export class ProductionListComponent implements OnInit {
 
   confirmWaste(wasteOpts: { quantity: number; wasteReason: string }) {
     const { quantity, wasteReason } = wasteOpts;
-
     const batch = this.wasteBatch();
     if (!batch) return;
 
-    this.reversing.set(true);
+    this.wasting.set(true);
 
     this.productionService
       .wasteBatch(batch._id, wasteReason, quantity)
@@ -303,12 +300,8 @@ export class ProductionListComponent implements OnInit {
         next: (result) => {
           this.wasting.set(false);
           this.cancelWaste();
-
-          // Show success message
           alert(result.message);
-
-          // Reload data
-          this.loadData();
+          this.loadData(this.pagination().page);
         },
         error: (error) => {
           this.wasting.set(false);
@@ -321,5 +314,29 @@ export class ProductionListComponent implements OnInit {
           }
         },
       });
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages()) {
+      return;
+    }
+
+    this.pagination.update((p) => ({ ...p, page }));
+    this.loadData(page);
+  }
+
+  totalPages(): number {
+    const total = this.pagination().total;
+    const pageSize = this.pagination().pageSize;
+    return Math.ceil(total / pageSize);
+  }
+
+  changePageSize(newSize: number) {
+    this.pagination.update((p) => ({
+      ...p,
+      pageSize: newSize,
+      page: 1,
+    }));
+    this.loadData(1);
   }
 }

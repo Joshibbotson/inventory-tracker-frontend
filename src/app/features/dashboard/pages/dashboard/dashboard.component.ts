@@ -6,7 +6,10 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Material } from '../../../materials/models/material.model';
-import { ProductionBatch } from '../../../production/services/production.service';
+import {
+  BatchSummary,
+  ProductionBatch,
+} from '../../../production/services/production.service';
 import { PaginatedResponse } from '../../../../core/types/PaginatedResponse';
 
 // export interface Material {
@@ -142,10 +145,11 @@ export class DashboardComponent implements OnInit {
           this.http.get<any>(`${this.apiUrl}/materials/statistics`)
         ),
         firstValueFrom(
-          this.http.get<ProductionBatch[]>(
+          this.http.post<PaginatedResponse<ProductionBatch> & BatchSummary>(
             `${
               this.apiUrl
-            }/production/history?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+            }/production/history?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
+            {}
           )
         ),
       ]);
@@ -160,7 +164,7 @@ export class DashboardComponent implements OnInit {
       this.outOfStockMaterials.set(outOfStock);
 
       // Calculate production stats
-      const activeBatches = productionHistory.filter((b) => !b.isReversed);
+      const activeBatches = productionHistory.data.filter((b) => !b.isReversed);
       const totalProductsProduced = activeBatches.reduce(
         (sum, b) => sum + b.quantity,
         0
