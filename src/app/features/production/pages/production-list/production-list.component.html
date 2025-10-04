@@ -266,7 +266,11 @@
       </thead>
       <tbody class="bg-white divide-y divide-neutral-200">
         @for (batch of filteredBatches(); track batch._id) {
-        <tr class="hover:bg-neutral-50" [class.bg-red-50]="batch.isReversed">
+        <tr
+          (click)="viewBatchDetails(batch)"
+          class="hover:bg-neutral-50 cursor-pointer"
+          [class.bg-red-50]="batch.isReversed"
+        >
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
             {{ formatDate(batch.createdAt) }}
           </td>
@@ -355,26 +359,20 @@
             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
           >
             <div class="flex items-center justify-end gap-2">
-              <button
-                (click)="viewBatchDetails(batch)"
-                class="text-amber-600 hover:text-amber-900"
-              >
-                View
-              </button>
               @if (!batch.isReversed) {
               <button
-                (click)="initiateReversal(batch)"
+                (click)="initiateReversal(batch, $event)"
                 class="text-red-600 hover:text-red-900"
               >
-                Reverse
+                <i class="fa-solid fa-rotate-left fa-lg"></i>
               </button>
               } @if (!batch.isReversed && batch.wasteQuantity !==
               batch.quantity) {
               <button
-                (click)="initiateWaste(batch)"
+                (click)="initiateWaste(batch, $event)"
                 class="text-red-600 hover:text-red-900"
               >
-                Waste
+                <i class="fa-solid fa-trash fa-lg"></i>
               </button>
               }
             </div>

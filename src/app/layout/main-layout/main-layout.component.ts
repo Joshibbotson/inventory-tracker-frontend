@@ -15,41 +15,8 @@ import { MobileMenuComponent } from '../components/mobile-menu/mobile-menu.compo
     SidebarComponent,
     MobileMenuComponent,
   ],
-  template: `
-    <div class="min-h-screen bg-neutral-50">
-      <!-- Desktop Sidebar -->
-      <app-sidebar [isOpen]="sidebarOpen()" class="hidden lg:block" />
-
-      <!-- Mobile Menu -->
-      <app-mobile-menu
-        [isOpen]="mobileMenuOpen()"
-        (closeMenu)="mobileMenuOpen.set(false)"
-      />
-
-      <!-- Main Content Area -->
-      <div class="lg:pl-64">
-        <!-- Top Navbar -->
-        <app-navbar
-          (toggleSidebar)="toggleSidebar()"
-          (toggleMobileMenu)="toggleMobileMenu()"
-        />
-
-        <!-- Page Content -->
-        <main class="px-4 py-6 sm:px-6 lg:px-8">
-          <div class="mx-auto max-w-7xl">
-            <router-outlet />
-          </div>
-        </main>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-    `,
-  ],
+  templateUrl: './main-layout.component.html',
+  styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
   sidebarOpen = signal(true);

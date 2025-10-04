@@ -220,10 +220,15 @@ export class ProductionListComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  initiateWaste(batch: ProductionBatch) {
+  initiateWaste(batch: ProductionBatch, e: Event) {
+    e.stopPropagation();
+
     this.wasteBatch.set(batch);
   }
-  initiateReversal(batch: ProductionBatch) {
+
+  initiateReversal(batch: ProductionBatch, e: Event) {
+    e.stopPropagation();
+
     this.reversalBatch.set(batch);
 
     // Check if can reverse

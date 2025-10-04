@@ -1,7 +1,7 @@
 <aside
   [class.translate-x-0]="isOpen"
   [class.-translate-x-full]="!isOpen"
-  class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-neutral-200 transition-transform duration-300 ease-in-out lg:translate-x-0"
+  class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-neutral-200 transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col"
 >
   <!-- Logo -->
   <div class="flex items-center h-16 px-6 border-b border-neutral-200">
@@ -343,4 +343,13 @@
     </div>
     }
   </nav>
+  <!-- Quote of the day -->
+  <div class="mt-auto p-3 text-center border-t border-neutral-200">
+    <blockquote class="text-sm text-neutral-600 italic">
+      “{{ quoteOfTheDay()?.quote }}”
+      <footer class="mt-1 text-neutral-400 not-italic">
+        — {{ quoteOfTheDay()?.author }}
+      </footer>
+    </blockquote>
+  </div>
 </aside>

@@ -185,6 +185,7 @@
     </svg>
   </div>
   } @else if (materials().length === 0) {
+
   <div
     class="text-center py-12 bg-white rounded-lg border-2 border-dashed border-neutral-300"
   >
@@ -381,13 +382,13 @@
                 [routerLink]="['/materials', material._id, 'edit']"
                 class="text-amber-600 hover:text-amber-900"
               >
-                Edit
+                <i class="fa-solid fa-pen-to-square fa-lg"></i>
               </a>
               <button
                 (click)="deleteMaterial(material)"
                 class="text-red-600 hover:text-red-900"
               >
-                Delete
+                <i class="fa-solid fa-trash fa-lg"></i>
               </button>
             </div>
           </td>
@@ -397,11 +398,13 @@
     </table>
 
     <!-- Page Navigation -->
-    <app-pagination-footer
-      [pagination]="pagination()"
-      (handlePageClick)="goToPage($event)"
-      (handlePageSizeChange)="changePageSize($event)"
-    />
+    <div class="mt-auto">
+      <app-pagination-footer
+        [pagination]="pagination()"
+        (handlePageClick)="goToPage($event)"
+        (handlePageSizeChange)="changePageSize($event)"
+      />
+    </div>
   </div>
   }
 </div>

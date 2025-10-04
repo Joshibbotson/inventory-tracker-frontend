@@ -190,6 +190,7 @@
     </div>
   </div>
   } @else {
+
   <div
     class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
   >
@@ -312,12 +313,13 @@
     </div>
     }
   </div>
-
-  <!-- Pagination Footer -->
-  <app-pagination-footer
-    [pagination]="pagination()"
-    (handlePageClick)="goToPage($event)"
-    (handlePageSizeChange)="changePageSize($event)"
-  />
+  <div class="mt-auto">
+    <!-- Pagination Footer -->
+    <app-pagination-footer
+      [pagination]="pagination()"
+      (handlePageClick)="goToPage($event)"
+      (handlePageSizeChange)="changePageSize($event)"
+    />
+  </div>
   }
 </div>
