@@ -74,7 +74,7 @@ export class ProductionCreateComponent implements OnInit {
         this.materialsService.getMaterials().toPromise(),
       ]);
 
-      this.products.set(products || []);
+      this.products.set(products?.data || []);
       this.materials.set(materials?.data || []);
     } catch (error) {
       console.error('Error loading data:', error);

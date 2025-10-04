@@ -59,7 +59,7 @@ export class ProductionListComponent implements OnInit {
 
       this.batches.set(batches || []);
       this.filteredBatches.set(batches || []);
-      this.products.set(products || []);
+      this.products.set(products?.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

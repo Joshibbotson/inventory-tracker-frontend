@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
 import { environment } from '../../../../environments/environment';
+import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -11,8 +12,19 @@ export class ProductsService {
   private readonly apiUrl = `${environment.apiUrl}/products`;
   private readonly http = inject(HttpClient);
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+  getProducts(
+    page = 1,
+    pageSize = 10,
+    opts?: {
+      searchTerm?: string;
+      category?: string;
+      status?: string;
+    }
+  ): Observable<PaginatedResponse<Product>> {
+    return this.http.post<PaginatedResponse<Product>>(
+      `${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`,
+      opts
+    );
   }
 
   getProduct(id: string): Observable<Product> {
