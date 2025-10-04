@@ -31,7 +31,6 @@
   </div>
 
   <!-- Filters and Search -->
-  <!-- Filters and Search -->
   <div class="bg-white p-4 rounded-lg shadow-sm border border-neutral-200">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       <!-- Search -->
@@ -95,9 +94,9 @@
           class="block w-full px-3 py-2 border border-neutral-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
         >
           <option value="">All Stock Levels</option>
-          <option value="LOW_STOCK">Low Stock</option>
-          <option value="OUT_OF_STOCK">Out of Stock</option>
-          <option value="IN_STOCK">In Stock</option>
+          <option [value]="StockLevel.LOW_STOCK">Low Stock</option>
+          <option [value]="StockLevel.OUT_OF_STOCK">Out of Stock</option>
+          <option [value]="StockLevel.IN_STOCK">In Stock</option>
         </select>
       </div>
     </div>

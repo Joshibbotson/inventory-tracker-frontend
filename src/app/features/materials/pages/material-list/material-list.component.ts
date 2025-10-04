@@ -34,6 +34,7 @@ export class MaterialListComponent implements OnInit {
   searchTerm = '';
   selectedCategory: MaterialCategory | '' = '';
   stockFilter: StockLevel | '' = '';
+  StockLevel = StockLevel;
 
   search = new Subject<string>();
   filterChange = new Subject<void>();

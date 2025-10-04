@@ -1,0 +1,145 @@
+<div class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen px-4">
+    <div
+      class="fixed inset-0 bg-black opacity-30"
+      (click)="cancelWaste()"
+    ></div>
+
+    <div class="relative bg-white rounded-lg max-w-md w-full p-6">
+      <div class="mb-4">
+        <h3 class="text-lg font-medium text-neutral-900">
+          Waste Production Batch
+        </h3>
+        <p class="text-sm text-neutral-500 mt-1">
+          {{ wasteBatch()!.batchNumber }}
+        </p>
+      </div>
+
+      <div
+        class="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg"
+      >
+        <div class="flex">
+          <svg
+            class="h-5 w-5 text-yellow-400 mr-2 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <div>
+            <span class="font-medium">Warning</span>
+            <p class="text-sm mt-1">This action will:</p>
+            <ul class="text-sm mt-2 list-disc list-inside">
+              <li>
+                <b>
+                  Waste {{ quantity.value }} unit(s) of
+                  {{ getProductName(wasteBatch()!.product) }}
+                </b>
+              </li>
+            </ul>
+            <p class="text-sm mt-2 font-medium">
+              This action cannot be undone!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="wasteForm" (ngSubmit)="confirmWaste()">
+        <!-- Quantity -->
+        <div class="mb-4">
+          <label for="quantity">
+            Quantity <span class="text-red-500">*</span>
+          </label>
+
+          <input
+            id="quantity"
+            type="number"
+            formControlName="quantity"
+            [max]="maxAllowed"
+            min="1"
+            class="text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
+
+          @if (quantity.touched && quantity.invalid) {
+          <p class="mt-1 text-xs text-red-600">
+            @if (quantity.hasError('required')) { Quantity is required. }
+            <!--  -->
+            @else if (quantity.hasError('min')) { Quantity must be at least 1. }
+            <!--  -->
+            @else if (quantity.hasError('max')) { Quantity cannot exceed
+            {{ maxAllowed }}. }
+          </p>
+          }
+        </div>
+
+        <!-- Waste reason -->
+        <div class="mb-4">
+          <label
+            for="wasteReason"
+            class="block text-sm font-medium text-neutral-700 mb-2"
+          >
+            Waste Reason <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="wasteReason"
+            formControlName="wasteReason"
+            rows="3"
+            placeholder="Please explain why this production batch is being wasted..."
+            class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+            [class.border-red-500]="wasteReason.touched && wasteReason.invalid"
+          ></textarea>
+
+          @if (wasteReason.touched && wasteReason.invalid) {
+          <p class="mt-1 text-xs text-red-600">Waste reason is required.</p>
+          }
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+          <button
+            type="button"
+            (click)="cancelWaste()"
+            class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg shadow-sm hover:bg-neutral-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            [disabled]="wasting() || wasteForm.invalid"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (wasting()) {
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Wasting... } @else { Waste Production }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

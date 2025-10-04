@@ -24,6 +24,11 @@ export interface ProductionBatch {
   reversalReason?: string;
   reversedBy?: string;
   reversedAt?: string;
+  isWasted?: boolean;
+  wasteQuantity: number;
+  wasteReason?: string;
+  wasteBy?: string;
+  wasteAt?: string;
 }
 
 export interface ReversalCheck {
@@ -90,6 +95,17 @@ export class ProductionService {
   ): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
       `${this.apiUrl}/batch/${batchId}/reverse`,
+      { reason, quantity }
+    );
+  }
+
+  wasteBatch(
+    batchId: string,
+    reason: string,
+    quantity: number
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}/batch/${batchId}/waste`,
       { reason, quantity }
     );
   }

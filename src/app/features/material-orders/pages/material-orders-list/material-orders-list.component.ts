@@ -34,6 +34,7 @@ export class MaterialOrdersListComponent implements OnInit {
     pageSize: 10,
     total: 0,
   });
+  searchQuery = signal('');
 
   selectedMaterial = '';
   startDate = '';

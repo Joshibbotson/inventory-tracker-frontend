@@ -9,11 +9,19 @@ import {
   ProductionService,
   ProductionBatch,
 } from '../../services/production.service';
+import { ReversalModalComponent } from '../../components/reversal-modal/reversal-modal.component';
+import { WasteModalComponent } from '../../components/waste-modal/waste-modal.component';
 
 @Component({
   selector: 'app-production-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ReversalModalComponent,
+    WasteModalComponent,
+  ],
   templateUrl: './production-list.component.html',
   styles: [],
 })
@@ -27,12 +35,11 @@ export class ProductionListComponent implements OnInit {
   selectedBatch = signal<ProductionBatch | null>(null);
   reversalBatch = signal<ProductionBatch | null>(null);
   reversalCheck = signal<{ canReverse: boolean; reason?: string } | null>(null);
+  wasteBatch = signal<ProductionBatch | null>(null);
   loading = signal(true);
   reversing = signal(false);
+  wasting = signal(false);
 
-  quantity = 0;
-  reversalReason = '';
-  reversalAttempted = false;
   selectedProduct = '';
   startDate = '';
   endDate = '';
@@ -213,11 +220,11 @@ export class ProductionListComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
+  initiateWaste(batch: ProductionBatch) {
+    this.wasteBatch.set(batch);
+  }
   initiateReversal(batch: ProductionBatch) {
     this.reversalBatch.set(batch);
-    this.quantity = batch.quantity - batch.reversedQuantity;
-    this.reversalReason = '';
-    this.reversalAttempted = false;
 
     // Check if can reverse
     this.productionService.checkCanReverse(batch._id).subscribe({
@@ -237,17 +244,10 @@ export class ProductionListComponent implements OnInit {
   cancelReversal() {
     this.reversalBatch.set(null);
     this.reversalCheck.set(null);
-    this.reversalReason = '';
-    this.quantity = 0;
-    this.reversalAttempted = false;
   }
 
-  confirmReversal() {
-    this.reversalAttempted = true;
-
-    if (!this.reversalReason.trim()) {
-      return;
-    }
+  confirmReversal(wasteOpts: { quantity: number; reversalReason: string }) {
+    const { quantity, reversalReason } = wasteOpts;
 
     const batch = this.reversalBatch();
     if (!batch) return;
@@ -255,7 +255,7 @@ export class ProductionListComponent implements OnInit {
     this.reversing.set(true);
 
     this.productionService
-      .reverseBatch(batch._id, this.reversalReason, this.quantity)
+      .reverseBatch(batch._id, reversalReason, quantity)
       .subscribe({
         next: (result) => {
           this.reversing.set(false);
@@ -275,6 +275,44 @@ export class ProductionListComponent implements OnInit {
             alert(`Reversal failed: ${error.error.message}`);
           } else {
             alert('Failed to reverse production batch. Please try again.');
+          }
+        },
+      });
+  }
+
+  cancelWaste() {
+    this.wasteBatch.set(null);
+  }
+
+  confirmWaste(wasteOpts: { quantity: number; wasteReason: string }) {
+    const { quantity, wasteReason } = wasteOpts;
+
+    const batch = this.wasteBatch();
+    if (!batch) return;
+
+    this.reversing.set(true);
+
+    this.productionService
+      .wasteBatch(batch._id, wasteReason, quantity)
+      .subscribe({
+        next: (result) => {
+          this.wasting.set(false);
+          this.cancelWaste();
+
+          // Show success message
+          alert(result.message);
+
+          // Reload data
+          this.loadData();
+        },
+        error: (error) => {
+          this.wasting.set(false);
+          console.error('Error wasting batch:', error);
+
+          if (error.error?.message) {
+            alert(`Wasting failed: ${error.error.message}`);
+          } else {
+            alert('Failed to waste production batch. Please try again.');
           }
         },
       });
