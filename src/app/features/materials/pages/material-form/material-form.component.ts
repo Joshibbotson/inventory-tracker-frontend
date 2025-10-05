@@ -34,7 +34,6 @@ export class MaterialFormComponent implements OnInit {
 
   materialForm = this.fb.group({
     name: ['', [Validators.required]],
-    sku: ['', [Validators.required]],
     unit: ['', [Validators.required]],
     currentStock: [0, [Validators.required, Validators.min(0)]],
     minimumStock: [0, [Validators.required, Validators.min(0)]],
@@ -44,6 +43,9 @@ export class MaterialFormComponent implements OnInit {
     notes: [''],
     isActive: [true],
   });
+
+  // really just here to show SKU on edit readonly
+  material = signal<Material | null>(null);
 
   ngOnInit() {
     // Check if we're in edit mode
@@ -72,9 +74,9 @@ export class MaterialFormComponent implements OnInit {
     this.loading.set(true);
     this.materialsService.getMaterial(this.materialId).subscribe({
       next: (material) => {
+        this.material.set(material);
         this.materialForm.patchValue({
           name: material.name,
-          sku: material.sku,
           unit:
             typeof material.unit === 'object'
               ? material.unit._id

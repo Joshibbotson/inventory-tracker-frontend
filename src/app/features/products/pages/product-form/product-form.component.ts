@@ -135,14 +135,14 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  onMaterialSelected(material: Material, recipeIndex: number) {
+  onMaterialSelected(material: Material | undefined, recipeIndex: number) {
     const recipeItem = this.recipeItems.at(recipeIndex);
 
     // Set the material ID
     recipeItem.patchValue({
-      material: material._id,
+      material: material?._id,
       // Auto-populate unit from material
-      unit: material.unit._id,
+      unit: material?.unit._id,
     });
   }
 

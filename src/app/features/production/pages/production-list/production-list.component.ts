@@ -49,7 +49,6 @@ export class ProductionListComponent implements OnInit {
     total: 0,
   });
 
-  selectedProduct = '';
   startDate = '';
   endDate = '';
   searchQuery = signal('');
@@ -60,7 +59,6 @@ export class ProductionListComponent implements OnInit {
   totalActiveCost = signal(0);
   totalReversedCost = signal(0);
 
-  searchTerm = '';
   search = new Subject<string>();
   filterChange = new Subject<void>();
 
@@ -79,7 +77,6 @@ export class ProductionListComponent implements OnInit {
       )
       .subscribe({
         next: (searchTerm) => {
-          this.searchTerm = searchTerm;
           this.loadData(1); // Reset to page 1 on search
         },
         error: (err) => {
@@ -314,6 +311,16 @@ export class ProductionListComponent implements OnInit {
           }
         },
       });
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.searchQuery() || this.startDate || this.endDate);
+  }
+  clearFilters(): void {
+    this.startDate = '';
+    this.endDate = '';
+    this.searchQuery.set('');
+    this.loadData(1);
   }
 
   goToPage(page: number) {

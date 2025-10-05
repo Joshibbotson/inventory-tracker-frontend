@@ -19,8 +19,7 @@ import {
   styleUrl: './material-search.component.scss',
 })
 export class MaterialSearchComponent {
-  // Add input for initial material
-  initialMaterialId = input<string>('');
+  initialMaterialId = input<string | undefined>('');
 
   searchQuery = signal('');
   materials = signal<Material[]>([]);
@@ -28,7 +27,7 @@ export class MaterialSearchComponent {
   isOpen = signal(false);
   selectedIndex = signal(-1);
 
-  materialSelected = output<Material>();
+  materialSelected = output<Material | undefined>();
 
   private searchSubject = new Subject<string>();
 
@@ -65,6 +64,9 @@ export class MaterialSearchComponent {
       const materialId = this.initialMaterialId();
       if (materialId) {
         this.loadInitialMaterial(materialId);
+      } else if (!materialId) {
+        // for reset by parent
+        this.searchQuery.set('');
       }
     });
   }
@@ -140,6 +142,7 @@ export class MaterialSearchComponent {
   }
 
   clearSearch(): void {
+    this.materialSelected.emit(undefined);
     this.searchQuery.set('');
     this.materials.set([]);
     this.isOpen.set(false);

@@ -132,7 +132,7 @@ export class MaterialOrderFormComponent {
     }
   }
 
-  onMaterialSelected(material: Material) {
-    this.materialOrderForm.patchValue({ material: material._id });
+  onMaterialSelected(material: Material | undefined) {
+    this.materialOrderForm.patchValue({ material: material?._id });
   }
 }

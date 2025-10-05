@@ -174,8 +174,8 @@ export class ProductionCreateComponent implements OnInit {
     }
   }
 
-  handleProductSelected(product: Product) {
-    this.productionForm.patchValue({ product: product._id });
+  handleProductSelected(product: Product | undefined) {
+    this.productionForm.patchValue({ product: product?._id });
   }
 
   navigateBack() {

@@ -61,25 +61,21 @@
           </div>
 
           <!-- SKU -->
+          @if (material()?.sku) {
+
           <div>
             <label for="sku" class="block text-sm font-medium text-neutral-700"
               >SKU</label
             >
             <input
+              [value]="material()?.sku"
+              readonly
               id="sku"
               type="text"
-              formControlName="sku"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-              [class.border-red-500]="
-                materialForm.get('sku')?.invalid &&
-                materialForm.get('sku')?.touched
-              "
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
             />
-            @if (materialForm.get('sku')?.invalid &&
-            materialForm.get('sku')?.touched) {
-            <p class="mt-1 text-xs text-red-600">SKU is required</p>
-            }
           </div>
+          }
 
           <!-- Category -->
           <div>
@@ -156,24 +152,6 @@
         <h2 class="text-lg font-medium text-neutral-900">Stock Information</h2>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <!-- Current Stock -->
-          <div>
-            <label
-              for="currentStock"
-              class="block text-sm font-medium text-neutral-700"
-              >Current Stock</label
-            >
-            <input
-              readonly
-              id="currentStock"
-              type="number"
-              formControlName="currentStock"
-              min="0"
-              step="1"
-              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
-            />
-          </div>
-
           <!-- Minimum Stock -->
           <div>
             <label
@@ -188,6 +166,25 @@
               min="0"
               step="1"
               class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+            />
+          </div>
+          <!-- Current Stock -->
+          @if (isEditMode) {
+
+          <div>
+            <label
+              for="currentStock"
+              class="block text-sm font-medium text-neutral-700"
+              >Current Stock</label
+            >
+            <input
+              readonly
+              id="currentStock"
+              type="number"
+              formControlName="currentStock"
+              min="0"
+              step="1"
+              class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
             />
           </div>
 
@@ -209,6 +206,7 @@
               class="mt-1 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm read-only:bg-neutral-100 read-only:text-neutral-500 read-only:border-neutral-200"
             />
           </div>
+          }
         </div>
 
         <!-- Stock Value -->

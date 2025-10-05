@@ -38,7 +38,7 @@ export class ProductSearchComponent {
   isOpen = signal(false);
   selectedIndex = signal(-1);
 
-  productSelected = output<Product>();
+  productSelected = output<Product | undefined>();
 
   private searchSubject = new Subject<string>();
 
@@ -153,6 +153,7 @@ export class ProductSearchComponent {
   }
 
   clearSearch(): void {
+    this.productSelected.emit(undefined);
     this.searchQuery.set('');
     this.products.set([]);
     this.isOpen.set(false);

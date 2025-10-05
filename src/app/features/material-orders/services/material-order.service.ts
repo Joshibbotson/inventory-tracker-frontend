@@ -27,13 +27,11 @@ export class MaterialOrderService {
   getOrders(
     page = 1,
     pageSize = 10,
-    materialId?: string
+    opts: { materialId?: string; startDate?: string; endDate?: string }
   ): Observable<PaginatedResponse<MaterialOrder>> {
-    return this.http.get<PaginatedResponse<MaterialOrder>>(
-      `${this.apiUrl}?page=${page}&pageSize=${pageSize}`,
-      {
-        params: materialId ? { materialId } : {},
-      }
+    return this.http.post<PaginatedResponse<MaterialOrder>>(
+      `${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`,
+      opts
     );
   }
 

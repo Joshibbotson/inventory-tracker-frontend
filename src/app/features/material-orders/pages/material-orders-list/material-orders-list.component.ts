@@ -1,31 +1,33 @@
-// material-orders-list.component.ts
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Material } from '../../../materials/models/material.model';
-import { MaterialsService } from '../../../materials/services/materials.service';
 import {
   MaterialOrderService,
   MaterialOrder,
 } from '../../services/material-order.service';
 import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
 import { Pagination } from '../../../../core/types/Pagination';
-import { forkJoin } from 'rxjs';
+import { MaterialSearchComponent } from '../../../materials/components/material-search/material-search.component';
 
 @Component({
   selector: 'app-material-orders-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationFooterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    PaginationFooterComponent,
+    MaterialSearchComponent,
+  ],
   templateUrl: './material-orders-list.component.html',
   styles: [],
 })
 export class MaterialOrdersListComponent implements OnInit {
   private orderService = inject(MaterialOrderService);
-  private materialsService = inject(MaterialsService);
 
   orders = signal<MaterialOrder[]>([]);
-  filteredOrders = signal<MaterialOrder[]>([]);
   materials = signal<Material[]>([]);
   selectedOrder = signal<MaterialOrder | null>(null);
   loading = signal(true);
@@ -36,7 +38,7 @@ export class MaterialOrdersListComponent implements OnInit {
   });
   searchQuery = signal('');
 
-  selectedMaterial = '';
+  selectedMaterial?: string;
   startDate = '';
   endDate = '';
 
@@ -46,77 +48,39 @@ export class MaterialOrdersListComponent implements OnInit {
 
   async loadData(page = 1) {
     this.loading.set(true);
-
-    forkJoin({
-      orders: this.orderService.getOrders(
-        this.pagination().page,
-        this.pagination().pageSize
-      ),
-      materials: this.materialsService.getMaterials(), // gonna have to make this a typeahead swiftly
-    }).subscribe({
-      next: (res) => {
-        this.orders.set(res.orders.data || []);
-        this.filteredOrders.set(res.orders.data || []);
-        this.materials.set(res.materials?.data || []);
-        this.pagination.set({
-          page: res.orders.page,
-          pageSize: res.orders.pageSize,
-          total: res.orders.total,
-        });
-      },
-      error: (err) => {
-        console.error('Error loading data:', err);
-        this.loading.set(false);
-      },
-      complete: () => this.loading.set(false),
-    });
-  }
-
-  filterOrders() {
-    let filtered = this.orders();
-
-    if (this.selectedMaterial) {
-      filtered = filtered.filter((order) => {
-        const materialId =
-          typeof order.material === 'object'
-            ? order.material._id
-            : order.material;
-        return materialId === this.selectedMaterial;
+    this.orderService
+      .getOrders(this.pagination().page, this.pagination().pageSize, {
+        materialId: this.selectedMaterial,
+        startDate: this.startDate,
+        endDate: this.endDate,
+      })
+      .subscribe({
+        next: (res) => {
+          this.orders.set(res.data || []);
+          this.pagination.set({
+            page: res.page,
+            pageSize: res.pageSize,
+            total: res.total,
+          });
+        },
+        error: (err) => {
+          console.error('Error loading data:', err);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
       });
-    }
-
-    if (this.startDate) {
-      const start = new Date(this.startDate);
-      filtered = filtered.filter(
-        (order) => new Date(order.createdAt!) >= start
-      );
-    }
-
-    if (this.endDate) {
-      const end = new Date(this.endDate);
-      end.setHours(23, 59, 59, 999);
-      filtered = filtered.filter((order) => new Date(order.createdAt!) <= end);
-    }
-
-    this.filteredOrders.set(filtered);
   }
 
   calculateTotalSpent(): number {
-    return this.filteredOrders().reduce(
-      (sum, order) => sum + order.totalCost,
-      0
-    );
+    return this.orders().reduce((sum, order) => sum + order.totalCost, 0);
   }
 
   calculateTotalUnits(): number {
-    return this.filteredOrders().reduce(
-      (sum, order) => sum + order.quantity,
-      0
-    );
+    return this.orders().reduce((sum, order) => sum + order.quantity, 0);
   }
 
   calculateAverageOrderValue(): number {
-    const orders = this.filteredOrders();
+    const orders = this.orders();
     if (orders.length === 0) return 0;
     return this.calculateTotalSpent() / orders.length;
   }
@@ -142,6 +106,23 @@ export class MaterialOrdersListComponent implements OnInit {
       }
     }
     return '';
+  }
+
+  handleSelectedMaterial(material: Material | undefined): void {
+    this.selectedMaterial = material?._id;
+    this.loadData(1);
+  }
+
+  handleDateChange(filter: 'startDate' | 'endDate', value: string): void {
+    switch (filter) {
+      case 'startDate':
+        this.startDate = value;
+        break;
+      case 'endDate':
+        this.endDate = value;
+        break;
+    }
+    this.loadData(1);
   }
 
   formatDate(date: any): string {
@@ -181,42 +162,15 @@ export class MaterialOrdersListComponent implements OnInit {
     }
   }
 
-  exportOrders() {
-    const headers = [
-      'Date',
-      'Material',
-      'SKU',
-      'Quantity',
-      'Unit Cost',
-      'Total Cost',
-      'Supplier',
-      'Notes',
-    ];
-    const rows = this.filteredOrders().map((order) => [
-      this.formatDate(order.createdAt),
-      this.getMaterialName(order.material),
-      this.getMaterialSku(order.material),
-      order.quantity.toString(),
-      order.unitCost?.toFixed(2) || '0',
-      order.totalCost.toFixed(2),
-      order.supplier || '',
-      order.notes || '',
-    ]);
+  hasActiveFilters(): boolean {
+    return !!(this.selectedMaterial || this.startDate || this.endDate);
+  }
 
-    let csv = headers.join(',') + '\n';
-    rows.forEach((row) => {
-      csv += row.map((cell) => `"${cell}"`).join(',') + '\n';
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `material-orders-${
-      new Date().toISOString().split('T')[0]
-    }.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+  clearFilters(): void {
+    this.selectedMaterial = undefined;
+    this.startDate = '';
+    this.endDate = '';
+    this.loadData(1);
   }
 
   goToPage(page: number) {
