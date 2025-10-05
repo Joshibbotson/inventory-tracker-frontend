@@ -39,7 +39,7 @@ export class ReversalModalComponent {
   ngOnInit(): void {
     this.maxAllowed =
       this.reversalBatch().quantity -
-      ((this.reversalBatch().wasteQuantity || 0) +
+      ((this.reversalBatch().wastedQuantity || 0) +
         (this.reversalBatch().reversedQuantity || 0));
 
     this.reversalForm.get('quantity')!.setValue(this.maxAllowed);

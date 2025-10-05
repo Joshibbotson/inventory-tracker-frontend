@@ -146,7 +146,7 @@ export class MaterialOrdersListComponent implements OnInit {
       `Material: ${this.getMaterialName(order.material)}\n` +
       `Quantity: ${order.quantity}\n` +
       `Total Cost: £${order.totalCost.toFixed(2)}\n\n` +
-      `Note: This will not adjust stock levels.`;
+      `Note: This will adjust stock levels.`;
 
     if (confirm(confirmMessage)) {
       this.orderService.deleteOrder(order._id).subscribe({

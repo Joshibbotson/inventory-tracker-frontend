@@ -319,7 +319,7 @@
                 [class.text-red-600]="isLowStock(material)"
                 [class.text-green-600]="!isLowStock(material)"
               >
-                {{ material.currentStock }}
+                {{ material.currentStock | number : "0.0-2" }}
               </span>
               <span class="text-neutral-500">{{
                 material.unit.abbreviation || ""

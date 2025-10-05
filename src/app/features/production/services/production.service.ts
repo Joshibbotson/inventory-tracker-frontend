@@ -26,7 +26,7 @@ export interface ProductionBatch {
   reversedBy?: string;
   reversedAt?: string;
   isWasted?: boolean;
-  wasteQuantity: number;
+  wastedQuantity: number;
   wasteReason?: string;
   wasteBy?: string;
   wasteAt?: string;

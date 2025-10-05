@@ -33,7 +33,7 @@ export class WasteModalComponent {
   ngOnInit(): void {
     this.maxAllowed =
       this.wasteBatch().quantity -
-      ((this.wasteBatch().wasteQuantity || 0) +
+      ((this.wasteBatch().wastedQuantity || 0) +
         (this.wasteBatch().reversedQuantity || 0));
 
     this.wasteForm.get('quantity')!.setValue(this.maxAllowed);

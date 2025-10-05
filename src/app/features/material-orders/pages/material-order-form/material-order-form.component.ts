@@ -36,7 +36,6 @@ export class MaterialOrderFormComponent {
   loading = signal(false);
   materials = signal<Material[]>([]);
 
-  isEditMode = false;
   materialOrderId: string | null = null;
 
   materialOrderForm = this.fb.group({
@@ -52,17 +51,8 @@ export class MaterialOrderFormComponent {
   }
 
   ngOnInit() {
-    // Check if we're in edit mode
-    this.isEditMode = this.route.snapshot.data['mode'] === 'edit';
-    this.materialOrderId = this.route.snapshot.paramMap.get('id');
-
     // Load units
     this.loadMaterials();
-
-    // If edit mode, load the material
-    if (this.isEditMode && this.materialOrderId) {
-      this.loadOrder();
-    }
   }
 
   loadMaterials() {
@@ -108,15 +98,7 @@ export class MaterialOrderFormComponent {
       this.loading.set(true);
       const orderData = this.materialOrderForm.value as Partial<MaterialOrder>;
 
-      const request =
-        this.isEditMode && this.materialOrderId
-          ? this.materialOrderService.updateOrder(
-              this.materialOrderId,
-              orderData
-            )
-          : this.materialOrderService.createOrder(orderData);
-
-      request.subscribe({
+      this.materialOrderService.createOrder(orderData).subscribe({
         next: () => {
           this.router.navigate(['/material-orders']);
         },

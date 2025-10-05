@@ -25,7 +25,7 @@
   <div class="bg-white shadow-sm rounded-lg">
     <div class="px-6 py-4 border-b border-neutral-200">
       <h1 class="text-xl font-semibold text-neutral-900">
-        {{ isEditMode ? "Edit Material Order" : "Add New Material Order" }}
+        Add New Material Order
       </h1>
     </div>
 
@@ -146,19 +146,6 @@
         ></textarea>
       </div>
 
-      <!-- Active -->
-      <!-- <div class="flex items-center">
-        <input
-          id="isActive"
-          type="checkbox"
-          formControlName="isActive"
-          class="h-4 w-4 text-amber-600 border-neutral-300 rounded focus:ring-amber-500"
-        />
-        <label for="isActive" class="ml-2 block text-sm text-neutral-700">
-          Active
-        </label>
-      </div> -->
-
       <!-- Submit -->
       <div class="flex justify-end gap-3">
         <button
@@ -197,7 +184,7 @@
               5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          {{ isEditMode ? "Update" : "Create" }} Material
+          Create Material
         </button>
       </div>
     </form>

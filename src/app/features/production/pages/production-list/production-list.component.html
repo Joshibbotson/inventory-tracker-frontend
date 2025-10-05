@@ -272,6 +272,11 @@
           <th
             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
           >
+            Wasted Quantity
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+          >
             Unit Cost
           </th>
           <th
@@ -299,7 +304,7 @@
         <tr
           (click)="viewBatchDetails(batch)"
           class="hover:bg-neutral-50 cursor-pointer"
-          [class.bg-red-50]="batch.isReversed"
+          [class.bg-red-50]="batch.isReversed || batch.isWasted"
         >
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
             {{ formatDate(batch.createdAt) }}
@@ -308,7 +313,7 @@
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
               [ngClass]="{
-                'bg-red-100 text-red-800': batch.isReversed,
+                'bg-red-100 text-red-800': batch.isReversed || batch.isWasted,
                 'bg-amber-100 text-amber-800': !batch.isReversed
               }"
             >
@@ -326,12 +331,20 @@
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-            {{ batch.quantity - batch.reversedQuantity }} units
+            {{
+              batch.quantity - (batch.reversedQuantity + batch.wastedQuantity)
+            }}
+            units
           </td>
           <td
             class="text-red-700 px-6 py-4 whitespace-nowrap text-sm text-neutral-900"
           >
             {{ batch.reversedQuantity }} units
+          </td>
+          <td
+            class="text-red-700 px-6 py-4 whitespace-nowrap text-sm text-neutral-900"
+          >
+            {{ batch.wastedQuantity }} units
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
             £{{ batch.unitCost | number : "1.2-2" }}
@@ -349,6 +362,13 @@
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
             >
+              <i class="fa-solid fa-rotate-left pr-3"></i>
+              Reversed
+            </span>
+            } @if (batch.isWasted) {
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+            >
               <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fill-rule="evenodd"
@@ -356,9 +376,9 @@
                   clip-rule="evenodd"
                 />
               </svg>
-              Reversed
+              Wasted
             </span>
-            } @else {
+            } @else if(!batch.isReversed && !batch.isWasted) {
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
             >
@@ -379,7 +399,11 @@
               <span class="text-red-600"
                 >Reversed: {{ batch.reversalReason }}</span
               >
-              } @else {
+              } @if (batch.isWasted && batch.wasteReason) {
+              <span class="text-red-600"
+                >Reversed: {{ batch.wasteReason }}</span
+              >
+              } @else if(!batch.isWasted && !batch.isReversed){
               {{ batch.notes || "-" }}
               }
             </span>
@@ -388,14 +412,14 @@
             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
           >
             <div class="flex items-center justify-end gap-2">
-              @if (!batch.isReversed) {
+              @if (!batch.isReversed && !batch.isWasted) {
               <button
                 (click)="initiateReversal(batch, $event)"
                 class="text-red-600 hover:text-red-900"
               >
                 <i class="fa-solid fa-rotate-left fa-lg"></i>
               </button>
-              } @if (!batch.isReversed && batch.wasteQuantity !==
+              } @if (!batch.isReversed && batch.wastedQuantity !==
               batch.quantity) {
               <button
                 (click)="initiateWaste(batch, $event)"

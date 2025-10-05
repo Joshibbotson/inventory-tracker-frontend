@@ -13,7 +13,7 @@ import { ReversalModalComponent } from '../../components/reversal-modal/reversal
 import { WasteModalComponent } from '../../components/waste-modal/waste-modal.component';
 import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
 import { Pagination } from '../../../../core/types/Pagination';
-import { debounceTime, distinctUntilChanged, forkJoin, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
