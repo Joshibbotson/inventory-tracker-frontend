@@ -3,9 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Material, MaterialCategory } from '../models/material.model';
 import { environment } from '../../../../environments/environment';
-import { StockAdjustment } from '../../sales/models/StockAdjustment.model';
 import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 import { StockLevel } from '../enums/StockLevel.enum';
+import { StockAdjustment } from '../../material-orders/models/StockAdjustment.model';
 
 @Injectable({
   providedIn: 'root',

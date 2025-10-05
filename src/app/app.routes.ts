@@ -46,11 +46,6 @@ const protectedRoutes = [
           ),
       },
       {
-        path: 'sales',
-        loadChildren: () =>
-          import('./features/sales/sales.routes').then((m) => m.SALES_ROUTES),
-      },
-      {
         path: '**',
         redirectTo: 'dashboard',
       },

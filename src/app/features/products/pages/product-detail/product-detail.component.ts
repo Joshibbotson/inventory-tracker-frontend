@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ProductsService } from '../../services/products.service';
-import { SalesService } from '../../../sales/services/sales.service';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../models/product.model';
 import { ProductionService } from '../../../production/services/production.service';
@@ -20,7 +19,6 @@ export class ProductDetailComponent implements OnInit {
   private router = inject(Router);
   private productsService = inject(ProductsService);
   private readonly productionService = inject(ProductionService);
-  private salesService = inject(SalesService);
 
   product = signal<Product | null>(null);
   loading = signal(true);
@@ -84,34 +82,6 @@ export class ProductDetailComponent implements OnInit {
 
     this.productionService
       .createProductionBatch(product._id, this.quantity)
-      .subscribe({
-        next: () => {
-          this.saleLoading.set(false);
-          this.saleSuccess.set(true);
-          this.quantity = 1;
-          setTimeout(() => this.saleSuccess.set(false), 3000);
-        },
-        error: (error) => {
-          console.error('Error recording sale:', error);
-          this.saleLoading.set(false);
-
-          alert(`Failed to record sale: ${error['error']['message']}`);
-        },
-      });
-  }
-  recordSale() {
-    const product = this.product();
-    if (!product) return;
-
-    this.saleLoading.set(true);
-    this.saleSuccess.set(false);
-
-    this.salesService
-      .createSale({
-        product: product._id,
-        quantity: this.quantity,
-        totalPrice: product.sellingPrice * this.quantity,
-      })
       .subscribe({
         next: () => {
           this.saleLoading.set(false);
