@@ -2,63 +2,16 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
 import { Material } from '../../../materials/models/material.model';
 import {
-  BatchSummary,
-  ProductionBatch,
+  ProductionService,
+  StatPeriod,
 } from '../../../production/services/production.service';
-import { PaginatedResponse } from '../../../../core/types/PaginatedResponse';
-
-// export interface Material {
-//   _id: string;
-//   name: string;
-//   sku: string;
-//   currentStock: number;
-//   minimumStock: number;
-//   category: string;
-//   unit: any;
-// }
-
-// interface ProductionBatch {
-//   _id: string;
-//   product: any;
-//   quantity: number;
-//   batchNumber: string;
-//   totalCost: number;
-//   createdAt: string;
-//   isReversed: boolean;
-// }
-
-interface ProductionStats {
-  totalBatches: number;
-  totalProductsProduced: number;
-  totalProductionCost: number;
-  averageBatchSize: number;
-}
-
-interface DashboardStats {
-  totalMaterials: number;
-  totalProducts: number;
-  lowStockCount: number;
-  outOfStockCount: number;
-  totalInventoryValue: number;
-  productionStats: ProductionStats;
-}
-
-interface ProductionChartData {
-  date: string;
-  quantity: number;
-  batches: number;
-}
-
-interface ProductTotals {
-  productName: string;
-  totalQuantity: number;
-  batchCount: number;
-}
+import { DashboardStats } from '../../types/DashboardStats';
+import { ProductionChartData } from '../../types/ProductionChartData';
+import { ProductTotals } from '../../types/ProductTotals';
+import { MaterialsService } from '../../../materials/services/materials.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -68,8 +21,8 @@ interface ProductTotals {
   styles: [],
 })
 export class DashboardComponent implements OnInit {
-  private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl; // Adjust to your API base URL
+  private readonly productionService = inject(ProductionService);
+  private readonly materialsService = inject(MaterialsService);
 
   loading = signal(true);
   stats = signal<DashboardStats>({
@@ -91,7 +44,7 @@ export class DashboardComponent implements OnInit {
   productionChartData = signal<ProductionChartData[]>([]);
   productTotals = signal<ProductTotals[]>([]);
 
-  selectedPeriod = 'week';
+  selectedPeriod: StatPeriod = 'week';
 
   maxProduction = computed(() => {
     const data = this.productionChartData();
@@ -114,193 +67,53 @@ export class DashboardComponent implements OnInit {
     this.loading.set(true);
 
     try {
-      const endDate = new Date();
-      endDate.setHours(23, 59, 59, 999); // Set to end of today
-
-      const startDate = new Date();
-      startDate.setHours(0, 0, 0, 0);
-
-      // Set start date based on selected period
-      if (this.selectedPeriod === 'week') {
-        startDate.setDate(endDate.getDate() - 7);
-      } else if (this.selectedPeriod === 'month') {
-        startDate.setDate(endDate.getDate() - 30);
-      } else if (this.selectedPeriod === 'quarter') {
-        startDate.setDate(endDate.getDate() - 90);
-      } else if (this.selectedPeriod === '6months') {
-        startDate.setMonth(endDate.getMonth() - 6);
-      } else if (this.selectedPeriod === 'year') {
-        startDate.setMonth(endDate.getMonth() - 12);
-      }
-
-      // Load all data in parallel
-      const [materials, materialsStats, productionHistory] = await Promise.all([
+      const [materialsStats, productionStats] = await Promise.all([
+        firstValueFrom(this.materialsService.getMaterialsStatistics()),
         firstValueFrom(
-          this.http.post<PaginatedResponse<Material>>( // this will need to be changed
-            `${this.apiUrl}/materials/find-all`, // we'll need to fetch all stats
-            {}
-          )
-        ),
-        firstValueFrom(
-          this.http.get<any>(`${this.apiUrl}/materials/statistics`)
-        ),
-        firstValueFrom(
-          this.http.post<PaginatedResponse<ProductionBatch> & BatchSummary>(
-            `${
-              this.apiUrl
-            }/production/history?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
-            {}
-          )
+          this.productionService.getFullProductionStats(this.selectedPeriod)
         ),
       ]);
 
-      // Process materials for low stock
-      const lowStock = materials.data.filter(
-        (m) => m.currentStock > 0 && m.currentStock <= m.minimumStock
-      );
-      const outOfStock = materials.data.filter((m) => m.currentStock === 0);
-
-      this.lowStockMaterials.set(lowStock);
-      this.outOfStockMaterials.set(outOfStock);
-
-      // Calculate production stats
-      const activeBatches = productionHistory.data.filter((b) => !b.isReversed);
-      const totalProductsProduced = activeBatches.reduce(
-        (sum, b) => sum + b.quantity,
-        0
-      );
-      const totalProductionCost = activeBatches.reduce(
-        (sum, b) => sum + b.totalCost,
-        0
-      );
-      const averageBatchSize =
-        activeBatches.length > 0
-          ? totalProductsProduced / activeBatches.length
-          : 0;
+      const {
+        totalBatches,
+        totalProductsProduced,
+        totalProductionCost,
+        averageBatchSize,
+        timeline,
+        productTotals,
+      } = productionStats;
 
       // Update stats
       this.stats.set({
-        totalMaterials: materials.total,
+        totalMaterials: materialsStats.totalMaterials,
         totalProducts: materialsStats.totalMaterials || 0,
-        lowStockCount: lowStock.length,
-        outOfStockCount: outOfStock.length,
+        lowStockCount: materialsStats.lowStockCount,
+        outOfStockCount: materialsStats.outOfStockCount,
         totalInventoryValue: materialsStats.totalValue || 0,
         productionStats: {
-          totalBatches: activeBatches.length,
+          totalBatches,
           totalProductsProduced,
           totalProductionCost,
           averageBatchSize,
         },
       });
 
-      // Process production chart data (timeline)
-      this.processProductionChartData(activeBatches, startDate, endDate);
+      // Set chart data directly from backend
+      this.productionChartData.set(
+        timeline.map((t) => ({
+          date: t.date,
+          quantity: t.totalQuantity,
+          batches: t.batchCount,
+        }))
+      );
 
-      // Process product totals (bar chart)
-      this.processProductTotals(activeBatches);
+      // Set top products directly from backend
+      this.productTotals.set(productTotals);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       this.loading.set(false);
     }
-  }
-
-  private processProductionChartData(
-    batches: ProductionBatch[],
-    startDate: Date,
-    endDate: Date
-  ) {
-    const daysDiff = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const dataPoints: ProductionChartData[] = [];
-
-    // Determine grouping strategy based on period length
-    let groupBy: 'day' | 'week' | 'month' = 'day';
-    let intervals = daysDiff + 1;
-
-    if (daysDiff > 90) {
-      // For 6 months and 12 months, group by month
-      groupBy = 'month';
-      const monthsDiff = Math.ceil(daysDiff / 30);
-      intervals = monthsDiff;
-    } else if (daysDiff > 30) {
-      // For 90 days, group by week
-      groupBy = 'week';
-      intervals = Math.ceil(daysDiff / 7);
-    }
-
-    // Create data points based on grouping
-    for (let i = 0; i < intervals; i++) {
-      let periodStart: Date;
-      let periodEnd: Date;
-      let dateStr: string;
-
-      if (groupBy === 'day') {
-        periodStart = new Date(startDate);
-        periodStart.setDate(startDate.getDate() + i);
-        periodEnd = new Date(periodStart);
-        periodEnd.setHours(23, 59, 59, 999);
-        dateStr = periodStart.toISOString().split('T')[0];
-      } else if (groupBy === 'week') {
-        periodStart = new Date(startDate);
-        periodStart.setDate(startDate.getDate() + i * 7);
-        periodEnd = new Date(periodStart);
-        periodEnd.setDate(periodEnd.getDate() + 6);
-        periodEnd.setHours(23, 59, 59, 999);
-        dateStr = periodStart.toISOString().split('T')[0];
-      } else {
-        // month
-        periodStart = new Date(startDate);
-        periodStart.setMonth(startDate.getMonth() + i);
-        periodStart.setDate(1);
-        periodEnd = new Date(periodStart);
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
-        periodEnd.setDate(0);
-        periodEnd.setHours(23, 59, 59, 999);
-        dateStr = periodStart.toISOString().split('T')[0];
-      }
-
-      const periodBatches = batches.filter((b) => {
-        const batchDate = new Date(b.createdAt);
-        return batchDate >= periodStart && batchDate <= periodEnd;
-      });
-
-      dataPoints.push({
-        date: dateStr,
-        quantity: periodBatches.reduce((sum, b) => sum + b.quantity, 0),
-        batches: periodBatches.length,
-      });
-    }
-
-    this.productionChartData.set(dataPoints);
-  }
-
-  private processProductTotals(batches: ProductionBatch[]) {
-    const productMap = new Map<string, ProductTotals>();
-
-    batches.forEach((batch) => {
-      const productName = batch.product?.name || 'Unknown Product';
-      const existing = productMap.get(productName);
-
-      if (existing) {
-        existing.totalQuantity += batch.quantity;
-        existing.batchCount += 1;
-      } else {
-        productMap.set(productName, {
-          productName,
-          totalQuantity: batch.quantity,
-          batchCount: 1,
-        });
-      }
-    });
-
-    // Convert to array and sort by quantity
-    const totals = Array.from(productMap.values())
-      .sort((a, b) => b.totalQuantity - a.totalQuantity)
-      .slice(0, 5); // Top 5 products
-
-    this.productTotals.set(totals);
   }
 
   formatChartDate(dateStr: string): string {

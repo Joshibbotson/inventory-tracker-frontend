@@ -45,13 +45,31 @@ export interface ReversalCheck {
   reason?: string;
 }
 
-export interface ProductionStats {
+export interface IndividualProductionStats {
   totalProduced: number;
   averageBatchSize: number;
   averageUnitCost: number;
   totalBatches: number;
   recentBatches: ProductionBatch[];
 }
+
+export interface ProductionStats {
+  totalBatches: number;
+  totalProductsProduced: number;
+  totalProductionCost: number;
+  averageBatchSize: number;
+}
+
+export interface FullProductionStats extends ProductionStats {
+  timeline: { date: string; totalQuantity: number; batchCount: number }[];
+  productTotals: {
+    productName: string;
+    totalQuantity: number;
+    batchCount: number;
+  }[];
+}
+
+export type StatPeriod = 'week' | 'month' | 'quarter' | '6months' | 'year';
 
 @Injectable({
   providedIn: 'root',
@@ -87,8 +105,24 @@ export class ProductionService {
     );
   }
 
-  getProductionStats(productId: string): Observable<ProductionStats> {
-    return this.http.get<ProductionStats>(`${this.apiUrl}/stats/${productId}`);
+  getFullProductionStats(
+    selectedPeriod: StatPeriod
+  ): Observable<FullProductionStats> {
+    return this.http.get<FullProductionStats>(
+      `${this.apiUrl}/full-stats?period=${selectedPeriod}`
+    );
+  }
+
+  getProductionStats(): Observable<ProductionStats> {
+    return this.http.get<ProductionStats>(`${this.apiUrl}/stats`);
+  }
+
+  getProductionStatsByProductId(
+    productId: string
+  ): Observable<IndividualProductionStats> {
+    return this.http.get<IndividualProductionStats>(
+      `${this.apiUrl}/stats/${productId}`
+    );
   }
 
   checkCanReverse(batchId: string): Observable<ReversalCheck> {
