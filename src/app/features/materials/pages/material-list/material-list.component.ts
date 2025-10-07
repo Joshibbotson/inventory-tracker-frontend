@@ -183,7 +183,7 @@ export class MaterialListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting material:', error);
-          alert('Failed to delete material. Please try again.');
+          alert(`Failed to delete material: ${error.error.message}`);
         },
       });
     }

@@ -120,8 +120,12 @@ export class MaterialsService {
   }
 
   // Search materials
-  searchMaterials(query: string): Observable<Material[]> {
-    const params = new HttpParams().set('q', query);
+  searchMaterials(query: string, isActive?: boolean): Observable<Material[]> {
+    let params = new HttpParams().set('q', query);
+
+    if (isActive !== undefined)
+      params = params.set('isActive', isActive.toString());
+
     return this.http.get<Material[]>(`${this.apiUrl}/search`, { params });
   }
 

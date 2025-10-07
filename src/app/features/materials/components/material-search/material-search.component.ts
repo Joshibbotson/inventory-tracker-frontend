@@ -20,6 +20,7 @@ import {
 })
 export class MaterialSearchComponent {
   initialMaterialId = input<string | undefined>('');
+  isActive = input<boolean>();
 
   searchQuery = signal('');
   materials = signal<Material[]>([]);
@@ -43,7 +44,7 @@ export class MaterialSearchComponent {
             return of([]);
           }
           this.isLoading.set(true);
-          return this.materialsService.searchMaterials(query);
+          return this.materialsService.searchMaterials(query, this.isActive());
         })
       )
       .subscribe({

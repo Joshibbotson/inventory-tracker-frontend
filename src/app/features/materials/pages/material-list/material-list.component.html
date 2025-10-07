@@ -297,13 +297,25 @@
       </thead>
       <tbody class="bg-white divide-y divide-neutral-200">
         @for (material of materials(); track material._id) {
-        <tr class="hover:bg-neutral-50">
+        <tr
+          class="hover:bg-neutral-50"
+          [ngClass]="{
+            'opacity-75 bg-gray-100': !material.isActive
+          }"
+        >
           <td class="px-6 py-4 whitespace-nowrap">
             <div>
               <div class="text-sm font-medium text-neutral-900">
                 {{ material.name }}
               </div>
               <div class="text-xs text-neutral-500">{{ material.sku }}</div>
+              @if (!material.isActive) {
+              <span
+                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-300 text-gray-700"
+              >
+                Inactive
+              </span>
+              }
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
