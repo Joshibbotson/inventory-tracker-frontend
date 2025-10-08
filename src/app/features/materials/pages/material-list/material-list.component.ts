@@ -9,11 +9,18 @@ import { PaginationFooterComponent } from '../../../../core/components/paginatio
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StockLevel } from '../../enums/StockLevel.enum';
+import { SnakeToTitlePipe } from '../../../../core/pipes/snake-to-title.pipe';
 
 @Component({
   selector: 'app-material-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationFooterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    PaginationFooterComponent,
+    SnakeToTitlePipe,
+  ],
   templateUrl: './material-list.component.html',
   styles: [],
 })
