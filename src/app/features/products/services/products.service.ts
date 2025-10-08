@@ -31,8 +31,12 @@ export class ProductsService {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  searchProducts(query: string): Observable<Product[]> {
-    const params = new HttpParams().set('q', query);
+  searchProducts(query: string, isActive?: boolean): Observable<Product[]> {
+    let params = new HttpParams().set('q', query);
+
+    if (isActive !== undefined)
+      params = params.set('isActive', isActive.toString());
+
     return this.http.get<Product[]>(`${this.apiUrl}/search`, { params });
   }
 

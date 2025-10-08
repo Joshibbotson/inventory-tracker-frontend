@@ -29,6 +29,7 @@ export class ProductSearchComponent {
   private readonly productService = inject(ProductsService);
   private readonly destroyRef = inject(DestroyRef);
   initialProductId = input<string>('');
+  isActive = input<boolean>();
 
   backendUrl = environment.apiUrl;
 
@@ -54,7 +55,7 @@ export class ProductSearchComponent {
             return of([]);
           }
           this.isLoading.set(true);
-          return this.productService.searchProducts(query);
+          return this.productService.searchProducts(query, this.isActive());
         })
       )
       .subscribe({

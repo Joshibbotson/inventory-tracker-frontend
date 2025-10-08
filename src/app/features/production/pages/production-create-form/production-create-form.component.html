@@ -42,7 +42,10 @@
         <label for="product" class="block text-sm font-medium text-neutral-700">
           Product to Produce <span class="text-red-500">*</span>
         </label>
-        <app-product-search (productSelected)="handleProductSelected($event)" />
+        <app-product-search
+          (productSelected)="handleProductSelected($event)"
+          [isActive]="true"
+        />
         @if (productionForm.get('product')?.invalid &&
         productionForm.get('product')?.touched) {
         <p class="mt-1 text-xs text-red-600">Please select a product</p>

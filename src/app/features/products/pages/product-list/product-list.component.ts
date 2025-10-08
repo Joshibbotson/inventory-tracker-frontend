@@ -147,7 +147,7 @@ export class ProductListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting product:', error);
-          alert('Failed to delete product. Please try again.');
+          alert(`Failed to delete product: ${error.error.message}`);
         },
       });
     }
