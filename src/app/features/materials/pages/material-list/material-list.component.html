@@ -237,7 +237,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Total Materials</dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        {{ materials().length }}
+        {{ materialStats().totalMaterials }}
       </dd>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
@@ -245,13 +245,13 @@
         Total Inventory Value
       </dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        £{{ calculateTotalValue() | number : "1.2-2" }}
+        £{{ materialStats().totalInventoryValue | number : "1.2-2" }}
       </dd>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Low Stock Items</dt>
       <dd class="mt-1 text-3xl font-semibold text-red-600">
-        {{ lowStockMaterials().length }}
+        {{ materialStats().lowStockItems }}
       </dd>
     </div>
   </div>
@@ -328,15 +328,15 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-2">
               <span
-                [class.text-red-600]="isLowStock(material)"
-                [class.text-green-600]="!isLowStock(material)"
+                [class.text-red-600]="material | isLowStock"
+                [class.text-green-600]="!(material | isLowStock)"
               >
                 {{ material.currentStock | number : "0.0-2" }}
               </span>
               <span class="text-neutral-500">{{
                 material.unit.abbreviation || ""
               }}</span>
-              @if (isLowStock(material)) {
+              @if (material | isLowStock) {
               <svg
                 class="h-4 w-4 text-red-500"
                 fill="none"

@@ -10,6 +10,8 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StockLevel } from '../../enums/StockLevel.enum';
 import { SnakeToTitlePipe } from '../../../../core/pipes/snake-to-title.pipe';
+import { IsLowStockPipe } from '../../pipes/is-low-stock.pipe';
+import { MaterialListStats } from '../../types/MaterialListStats';
 
 @Component({
   selector: 'app-material-list',
@@ -20,6 +22,7 @@ import { SnakeToTitlePipe } from '../../../../core/pipes/snake-to-title.pipe';
     FormsModule,
     PaginationFooterComponent,
     SnakeToTitlePipe,
+    IsLowStockPipe,
   ],
   templateUrl: './material-list.component.html',
   styles: [],
@@ -29,6 +32,11 @@ export class MaterialListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   materials = signal<Material[]>([]);
+  materialStats = signal<MaterialListStats>({
+    totalMaterials: 0,
+    totalInventoryValue: 0,
+    lowStockItems: 0,
+  });
   lowStockMaterials = signal<Material[]>([]);
   loading = signal(true);
   pagination = signal<Pagination>({
@@ -133,7 +141,7 @@ export class MaterialListComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.materials.set(res.data);
-          this.updateLowStockList(res.data);
+          this.materialStats.set(res.materialStats);
           this.pagination.set({
             page: res.page,
             pageSize: res.pageSize,
@@ -152,17 +160,17 @@ export class MaterialListComponent implements OnInit {
     return material.currentStock <= material.minimumStock;
   }
 
-  updateLowStockList(materials: Material[]) {
-    const lowStock = materials.filter((m) => this.isLowStock(m));
-    this.lowStockMaterials.set(lowStock);
-  }
+  // updateLowStockList(materials: Material[]) {
+  //   const lowStock = materials.filter((m) => this.isLowStock(m));
+  //   this.lowStockMaterials.set(lowStock);
+  // }
 
-  calculateTotalValue(): number {
-    return this.materials().reduce(
-      (total, m) => total + m.currentStock * m.averageCost,
-      0
-    );
-  }
+  // calculateTotalValue(): number {
+  //   return this.materials().reduce(
+  //     (total, m) => total + m.currentStock * m.averageCost,
+  //     0
+  //   );
+  // }
 
   adjustStock(material: Material, adjustment: number) {
     this.materialsService

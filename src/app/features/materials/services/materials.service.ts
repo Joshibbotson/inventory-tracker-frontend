@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
 import { StockLevel } from '../enums/StockLevel.enum';
 import { StockAdjustment } from '../../material-orders/models/StockAdjustment.model';
+import { MaterialListStats } from '../types/MaterialListStats';
 
 @Injectable({
   providedIn: 'root',
@@ -22,11 +23,12 @@ export class MaterialsService {
       category?: MaterialCategory;
       stockLevel?: StockLevel;
     }
-  ): Observable<PaginatedResponse<Material>> {
-    return this.http.post<PaginatedResponse<Material>>(
-      `${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`,
-      opts
-    );
+  ): Observable<
+    PaginatedResponse<Material> & { materialStats: MaterialListStats }
+  > {
+    return this.http.post<
+      PaginatedResponse<Material> & { materialStats: MaterialListStats }
+    >(`${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`, opts);
   }
 
   // Get single material by ID
