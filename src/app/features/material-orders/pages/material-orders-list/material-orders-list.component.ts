@@ -10,6 +10,7 @@ import {
 import { PaginationFooterComponent } from '../../../../core/components/pagination-footer/pagination-footer.component';
 import { Pagination } from '../../../../core/types/Pagination';
 import { MaterialSearchComponent } from '../../../materials/components/material-search/material-search.component';
+import { OrderListStats } from '../../types/OrderListStats';
 
 @Component({
   selector: 'app-material-orders-list',
@@ -28,6 +29,12 @@ export class MaterialOrdersListComponent implements OnInit {
   private orderService = inject(MaterialOrderService);
 
   orders = signal<MaterialOrder[]>([]);
+  orderStats = signal<OrderListStats>({
+    totalOrders: 0,
+    totalSpent: 0,
+    totalUnits: 0,
+    averageOrderValue: 0,
+  });
   materials = signal<Material[]>([]);
   selectedOrder = signal<MaterialOrder | null>(null);
   loading = signal(true);
@@ -57,6 +64,7 @@ export class MaterialOrdersListComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.orders.set(res.data || []);
+          this.orderStats.set(res.orderListStats);
           this.pagination.set({
             page: res.page,
             pageSize: res.pageSize,

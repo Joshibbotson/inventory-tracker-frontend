@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Material } from '../../materials/models/material.model';
 import { PaginatedResponse } from '../../../core/types/PaginatedResponse';
+import { OrderListStats } from '../types/OrderListStats';
 
 export interface MaterialOrder {
   _id?: string;
@@ -28,11 +29,12 @@ export class MaterialOrderService {
     page = 1,
     pageSize = 10,
     opts: { materialId?: string; startDate?: string; endDate?: string }
-  ): Observable<PaginatedResponse<MaterialOrder>> {
-    return this.http.post<PaginatedResponse<MaterialOrder>>(
-      `${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`,
-      opts
-    );
+  ): Observable<
+    PaginatedResponse<MaterialOrder> & { orderListStats: OrderListStats }
+  > {
+    return this.http.post<
+      PaginatedResponse<MaterialOrder> & { orderListStats: OrderListStats }
+    >(`${this.apiUrl}/find-all/?page=${page}&pageSize=${pageSize}`, opts);
   }
 
   getOrder(materialId?: string): Observable<MaterialOrder> {

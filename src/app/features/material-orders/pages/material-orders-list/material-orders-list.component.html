@@ -123,25 +123,25 @@
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Total Orders</dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        {{ orders().length }}
+        {{ orderStats().totalOrders }}
       </dd>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Total Spent</dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        £{{ calculateTotalSpent() | number : "1.2-2" }}
+        £{{ orderStats().totalSpent | number : "1.2-2" }}
       </dd>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Total Units</dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        {{ calculateTotalUnits() | number : "1.0-0" }}
+        {{ orderStats().totalUnits | number : "1.0-0" }}
       </dd>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
       <dt class="text-sm font-medium text-neutral-500">Avg Order Value</dt>
       <dd class="mt-1 text-3xl font-semibold text-neutral-900">
-        £{{ calculateAverageOrderValue() | number : "1.2-2" }}
+        £{{ orderStats().averageOrderValue | number : "1.2-2" }}
       </dd>
     </div>
   </div>
