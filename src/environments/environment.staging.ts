@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://gym-tracker-backend-mobile.joshibbotson.com',
+  apiUrl: 'https://inventory-tracker-backend-staging.up.railway.app',
   businessName: 'Kirrou',
 };
